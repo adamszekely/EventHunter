@@ -142,12 +142,20 @@ public class FacebookActivity extends FragmentActivity {
         }
     }
 
+    public void facebookLoginClick(View v) {
+        int i = v.getId();
+        if (i == R.id.button_facebook_login) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+    }
 
-    public void onClick(View v) {
+    public void facebookSignoutClick(View v) {
         int i = v.getId();
         if (i == R.id.button_facebook_signout) {
             signOut();
         }
     }
+
 
 }
