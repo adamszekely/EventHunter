@@ -19,7 +19,7 @@
             android:id="@+id/icon"
 
             android:contentDescription="@string/desc_firebase_lockup"
-
+            android:src="@mipmap/ic_launcher_my"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
