@@ -5,11 +5,9 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap map;
     private TextView textView;
     protected GoogleApiClient mGoogleApiClient;
-    protected LocationRequest mLoactionRequest;
+    protected LocationRequest mLocationRequest;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,14 +48,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map=googleMap;
-  /*LatLng horsens=new LatLng(55.871805, 9.886148);
-  CameraPosition target= CameraPosition.builder().target(horsens).zoom(16).build();
-  map.moveCamera(CameraUpdateFactory.newCameraPosition(target));*/
     }
 
     public void click(View v)
     {
-
         switch(v.getId()){
             case R.id.normal:
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -71,43 +65,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
-
     @Override
     public void onLocationChanged(Location location) {
-        textView.setText("Longitude: "+location.getLongitude()+" Latitude: "+location.getLatitude() );
+
     }
 
     @Override
     public void onConnected(@Nullable Bundle connectionHint) {
-        mLoactionRequest=LocationRequest.create();
-        mLoactionRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLoactionRequest.setInterval(1000);
+       mLocationRequest =LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(1000);
         if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this,new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},42);
         }
         else
         {
-            // LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,mLoactionRequest,this);
-            Location   mLastLocation=LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Location mLastLocation=LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if(mLastLocation!=null)
             {
-                textView.setText("Longitude: "+mLastLocation.getLongitude()+"\nLatitude: "+mLastLocation.getLatitude() );
-                LatLng horsens=new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                CameraPosition target= CameraPosition.builder().target(horsens).zoom(18).build();
+                LatLng lastLocation=new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                CameraPosition target= CameraPosition.builder().target(lastLocation).zoom(18).build();
                 map.moveCamera(CameraUpdateFactory.newCameraPosition(target));
                 map.addMarker(new MarkerOptions()
-                        .position(horsens)
+                        .position(lastLocation)
                         .title("Here you are"));
             }
         }
-
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
+       mGoogleApiClient.connect();
     }
 
     @Override
