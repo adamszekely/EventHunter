@@ -1,20 +1,35 @@
 package com.example.adam.eventhunter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.internal.BottomNavigationMenuView;
+import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DialogTitle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -31,6 +46,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.util.List;
@@ -45,8 +61,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private boolean mRequestingLocationUpdates;
     private LocationCallback mLocationCallback;
     private FusedLocationProviderClient mFusedLocationClient;
-
+    private Toolbar toolbar;
     private Context mContext;
+    private FirebaseAuth mAuth;
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
@@ -85,13 +102,67 @@ public class MainActivity extends AppCompatActivity implements android.location.
         mContext = this.getApplicationContext();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mAuth = FirebaseAuth.getInstance();
         currentLocation = getLocation();
+        setTitle("Events nearby you");
+        toolbar = (Toolbar) findViewById(R.id.toolBar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
+        bottomNavigationMenuView.setItemIconTintList(null);
+        bottomNavigationMenuView.setSelectedItemId(R.id.nav_map);
+        bottomNavigationMenuView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.nav_list:
+                        Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.nav_map:
+                        Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.nav_calendar:
+                        Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                return true;
+            }
+        });
 
+        Spinner dynamicSpinner = (Spinner) findViewById(R.id.dynamic_spinner);
+
+        String[] items = new String[]{"Chai Latte", "Green Tea", "Black Tea"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
+
+        dynamicSpinner.setAdapter(adapter);
+
+        dynamicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
+                //((TextView) parent.getChildAt(0)).setTextSize(20);
+                switch ((String) parent.getItemAtPosition(position)) {
+                    case "Normal":
+                        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        break;
+                    case "Satellite":
+                        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        break;
+                    case "Hybrid":
+                        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // TODO Auto-generated method stub
+            }
+        });
     }
-
-
-
-
 
     public void updateUI() {
         if (currentLocation != null) {
@@ -123,7 +194,12 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
         map.setMyLocationEnabled(true);
         updateUI();
-        map.addMarker(new MarkerOptions().position(getLocationFromAddress(mContext,"Hybenvej 133. Horsens 8700, Denmark")).title("Hybenvej 133. Horsens 8700, Denmark"));
+        map.addMarker(new MarkerOptions()
+                .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
+                .title("Hybenvej 133. Horsens 8700, Denmark"));
+        map.addMarker(new MarkerOptions()
+                .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
+                .title("Vestergade 31. Aarhus 8000, Denmark"));
 
     }
 
@@ -209,7 +285,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
         return location;
     }
-    public LatLng getLocationFromAddress(Context context,String strAddress) {
+
+    public LatLng getLocationFromAddress(Context context, String strAddress) {
 
         Geocoder coder = new Geocoder(context);
         List<Address> address;
@@ -225,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
             location.getLatitude();
             location.getLongitude();
 
-            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+            p1 = new LatLng(location.getLatitude(), location.getLongitude());
 
         } catch (IOException ex) {
 
@@ -253,5 +330,27 @@ public class MainActivity extends AppCompatActivity implements android.location.
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.top_nav_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_logout:
+                mAuth.signOut();
+                LoginManager.getInstance().logOut();
+                Intent intent = new Intent(MainActivity.this, FacebookActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
     }
 }

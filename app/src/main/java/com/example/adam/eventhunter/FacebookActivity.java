@@ -32,9 +32,7 @@ public class FacebookActivity extends FragmentActivity {
 
     LoginButton loginButton;
     CallbackManager callbackManager;
-    View view;
     private FirebaseAuth mAuth;
-    TextView mStatusTextView, mDetailTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,18 +40,17 @@ public class FacebookActivity extends FragmentActivity {
         setContentView(R.layout.activity_facebook);
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
-        mStatusTextView = (TextView) findViewById(R.id.status);
-        mDetailTextView = (TextView) findViewById(R.id.detail);
+
         mAuth = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
         loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
-        //loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d("facebookLoginSuccess", "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
+                loginButton.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -66,7 +63,22 @@ public class FacebookActivity extends FragmentActivity {
                 Log.d("facebookLoginError", "facebook:onError", exception);
             }
         });
-
+        mAuth = FirebaseAuth.getInstance();
+        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user=mAuth.getCurrentUser();
+                if(user==null)
+                {
+                    return;
+                }
+                else{
+                    Intent intent=new Intent(FacebookActivity.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
     }
 
 
@@ -77,20 +89,11 @@ public class FacebookActivity extends FragmentActivity {
 
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
-    }
 
     // [START auth_with_facebook]
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d("AccessToken", "handleFacebookAccessToken:" + token);
-        // [START_EXCLUDE silent]
-        //showProgressDialog();
-        // [END_EXCLUDE]
+
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -100,62 +103,26 @@ public class FacebookActivity extends FragmentActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("SignInSuccess", "signInWithCredential:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
+
+
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("SignInFail", "signInWithCredential:failure", task.getException());
                             Toast.makeText(FacebookActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
+
                         }
 
-                        // [START_EXCLUDE]
-                        //hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
                 });
     }
     // [END auth_with_facebook]
 
-    public void signOut() {
-        mAuth.signOut();
-        LoginManager.getInstance().logOut();
-
-        updateUI(null);
-    }
-
-    private void updateUI(FirebaseUser user) {
-        //hideProgressDialog();
-        if (user != null) {
-            mStatusTextView.setText(getString(R.string.facebook_status_fmt, user.getDisplayName()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
-            findViewById(R.id.button_facebook_login).setVisibility(View.GONE);
-            findViewById(R.id.button_facebook_signout).setVisibility(View.VISIBLE);
-        } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
-
-            findViewById(R.id.button_facebook_login).setVisibility(View.VISIBLE);
-            findViewById(R.id.button_facebook_signout).setVisibility(View.GONE);
-        }
-    }
-
     public void facebookLoginClick(View v) {
-        int i = v.getId();
-        if (i == R.id.button_facebook_login) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        }
+
     }
 
-    public void facebookSignoutClick(View v) {
-        int i = v.getId();
-        if (i == R.id.button_facebook_signout) {
-            signOut();
-        }
-    }
+
 
 
 }

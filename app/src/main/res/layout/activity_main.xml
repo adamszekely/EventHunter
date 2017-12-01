@@ -6,50 +6,103 @@
     android:layout_height="match_parent"
     tools:context="com.example.adam.eventhunter.MainActivity">
 
-    <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolBar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="center"
+        android:background="@color/colorPrimary"
+        app:popupTheme="@style/ThemeOverlay.AppCompat"
+
+        >
+
+        <TextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/locationBtn"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:text="Events nearby you"
+            android:textColor="@color/com_facebook_button_background_color_focused"
+            android:textSize="18dp" />
+
+    </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/linearLayoutTitles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/appBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Map type"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearLayoutSpinners"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/linearLayoutTitles">
+
+
+        <Spinner
+            android:id="@+id/dynamic_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scrollbarSize="20dp"/>
+
+        <!--<Button-->
+            <!--android:id="@+id/normal"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="click"-->
+            <!--android:text="@string/normal" />-->
+
+        <!--<Button-->
+            <!--android:id="@+id/satellite"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+
+            <!--android:onClick="click"-->
+            <!--android:text="@string/satellite" />-->
+
+        <!--<Button-->
+            <!--android:id="@+id/hybrid"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+
+            <!--android:onClick="click"-->
+            <!--android:text="@string/hybrid" />-->
+    </LinearLayout>
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="0dp"
-        android:layout_height="445dp"
         android:id="@+id/map"
-        tools:contextx=".MainActivity"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        tools:layout_editor_absoluteY="50dp"
-        tools:layout_editor_absoluteX="3dp" />
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/menu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutSpinners"
+        tools:contextx=".MainActivity" />
 
-    <Button
-        android:id="@+id/normal"
-        android:layout_width="wrap_content"
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/menu"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/normal"
-        android:onClick="click"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/satellite"
+        app:itemTextColor="@drawable/nav_bar_color"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp" />
+        app:menu="@menu/bottom_nav_menu">
 
-    <Button
-        android:id="@+id/satellite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/satellite"
-        android:onClick="click"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintRight_toLeftOf="@+id/hybrid"
-        app:layout_constraintLeft_toRightOf="@+id/normal" />
-
-    <Button
-        android:id="@+id/hybrid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hybrid"
-        android:onClick="click"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintLeft_toRightOf="@+id/satellite" />
-
-
-
+    </android.support.design.widget.BottomNavigationView>
 </android.support.constraint.ConstraintLayout>
