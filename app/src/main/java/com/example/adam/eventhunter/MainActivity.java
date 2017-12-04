@@ -8,6 +8,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationMenuView;
@@ -49,6 +51,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements android.location.LocationListener, OnMapReadyCallback {
@@ -192,14 +195,29 @@ public class MainActivity extends AppCompatActivity implements android.location.
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        map.setMyLocationEnabled(true);
-        updateUI();
-        map.addMarker(new MarkerOptions()
-                .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
-                .title("Hybenvej 133. Horsens 8700, Denmark"));
-        map.addMarker(new MarkerOptions()
-                .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
-                .title("Vestergade 31. Aarhus 8000, Denmark"));
+        boolean mobileDataEnabled = false; // Assume disabled
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        try {
+            Class cmClass = Class.forName(cm.getClass().getName());
+            Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
+            method.setAccessible(true); // Make the method callable
+            // get the setting for "mobile data"
+            mobileDataEnabled = (Boolean)method.invoke(cm);
+        } catch (Exception e) {
+            // Some problem accessible private API
+            // TODO do whatever error handling you want here
+        }
+        if(mobileDataEnabled || wifi.isWifiEnabled()) {
+            map.setMyLocationEnabled(true);
+            updateUI();
+            map.addMarker(new MarkerOptions()
+                    .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
+                    .title("Hybenvej 133. Horsens 8700, Denmark"));
+            map.addMarker(new MarkerOptions()
+                    .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
+                    .title("Vestergade 31. Aarhus 8000, Denmark"));
+        }else{Toast.makeText(this,"Wifi or Mobile network has to be turned on", Toast.LENGTH_SHORT).show();}
 
     }
 
