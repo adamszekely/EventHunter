@@ -51,7 +51,7 @@ public class FacebookActivity extends FragmentActivity {
         mContext = this.getApplicationContext();
         cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         wcd = new WirelessConnectionDialogFragment();
-        ni = cm.getActiveNetworkInfo();
+
 
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
@@ -79,6 +79,13 @@ public class FacebookActivity extends FragmentActivity {
             }
         });
         mAuth = FirebaseAuth.getInstance();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ni = cm.getActiveNetworkInfo();
         mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -99,7 +106,6 @@ public class FacebookActivity extends FragmentActivity {
             }
         });
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

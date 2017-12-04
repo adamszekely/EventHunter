@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-     new setPinsOnMap().execute();
+        new setPinsOnMap().execute();
     }
 /*
     public void click(View v) {
@@ -347,24 +347,15 @@ public class MainActivity extends AppCompatActivity implements android.location.
         return true;
     }
 
-    private class setPinsOnMap extends AsyncTask<Void,Void,Void>
-    {
-        boolean connected=false;
+    private class setPinsOnMap extends AsyncTask<Void, Void, Void> {
+        boolean connected = false;
 
         @Override
         protected Void doInBackground(Void... voids) {
 
-            while(connected==false) {
-                NetworkInfo ni = cm.getActiveNetworkInfo();
-                if (ni!=null ) {
-                    if( ni.isConnectedOrConnecting()) {
-                        connected = true;
-                        /*try {
-                            Thread.sleep(60000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }*/
-                    }
+            while (connected == false) {
+                if (getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark") != null) {
+                    connected = true;
                 }
             }
             return null;
@@ -401,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
             }
             if (mobileDataEnabled || wifi.isWifiEnabled()) {
 
-                if(connected) {
+                if (connected) {
                     map.addMarker(new MarkerOptions()
                             .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
                             .title("Hybenvej 133. Horsens 8700, Denmark"));
