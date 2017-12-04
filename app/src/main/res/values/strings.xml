@@ -89,4 +89,8 @@
         <item>Satellite</item>
         <item>Hybrid</item>
     </string-array>
+
+    <string name="wireless_dialog">Mobile network or Wi-Fi needs to be turned on</string>
+    <string name="positive_button">Turn on</string>
+    <string name="negative_button">Cancel</string>
 </resources>

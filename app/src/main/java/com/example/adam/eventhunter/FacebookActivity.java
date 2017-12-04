@@ -1,7 +1,13 @@
 package com.example.adam.eventhunter;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,11 +39,20 @@ public class FacebookActivity extends FragmentActivity {
     LoginButton loginButton;
     CallbackManager callbackManager;
     private FirebaseAuth mAuth;
+    ConnectivityManager cm;
+    Context mContext;
+    DialogFragment wcd;
+    NetworkInfo ni;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_facebook);
+        mContext = this.getApplicationContext();
+        cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        wcd = new WirelessConnectionDialogFragment();
+        ni = cm.getActiveNetworkInfo();
+
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
 
@@ -67,15 +82,19 @@ public class FacebookActivity extends FragmentActivity {
         mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user=mAuth.getCurrentUser();
-                if(user==null)
-                {
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user == null) {
                     return;
-                }
-                else{
-                    Intent intent=new Intent(FacebookActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+                } else {
+
+                    if (ni != null) {
+                        Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        wcd.show(getSupportFragmentManager(),"Connection");
+
+                    }
                 }
             }
         });
@@ -121,8 +140,6 @@ public class FacebookActivity extends FragmentActivity {
     public void facebookLoginClick(View v) {
 
     }
-
-
 
 
 }

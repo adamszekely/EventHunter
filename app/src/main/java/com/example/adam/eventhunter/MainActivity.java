@@ -285,6 +285,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
             // May throw an IOException
             address = coder.getFromLocationName(strAddress, 5);
             if (address == null) {
+                /*Toast.makeText(this,"Wait a second",Toast.LENGTH_LONG).show();
+                Thread.sleep(3000);*/
                 return null;
             }
             Address location = address.get(0);
@@ -296,7 +298,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
         } catch (IOException ex) {
 
             ex.printStackTrace();
-        }
+        } /*catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
 
         return p1;
     }
