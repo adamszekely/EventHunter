@@ -9,7 +9,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationMenuView;
@@ -67,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Toolbar toolbar;
     private Context mContext;
     private FirebaseAuth mAuth;
+    ConnectivityManager cm;
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
@@ -103,11 +106,12 @@ public class MainActivity extends AppCompatActivity implements android.location.
         createLocationRequest();
         setContentView(R.layout.activity_main);
         mContext = this.getApplicationContext();
+        cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mAuth = FirebaseAuth.getInstance();
         currentLocation = getLocation();
-        setTitle("Events nearby you");
+        setTitle("");
         toolbar = (Toolbar) findViewById(R.id.toolBar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -185,42 +189,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        boolean mobileDataEnabled = false; // Assume disabled
-        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        try {
-            Class cmClass = Class.forName(cm.getClass().getName());
-            Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
-            method.setAccessible(true); // Make the method callable
-            // get the setting for "mobile data"
-            mobileDataEnabled = (Boolean)method.invoke(cm);
-        } catch (Exception e) {
-            // Some problem accessible private API
-            // TODO do whatever error handling you want here
-        }
-        if(mobileDataEnabled || wifi.isWifiEnabled()) {
-            map.setMyLocationEnabled(true);
-            updateUI();
-            map.addMarker(new MarkerOptions()
-                    .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
-                    .title("Hybenvej 133. Horsens 8700, Denmark"));
-            map.addMarker(new MarkerOptions()
-                    .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
-                    .title("Vestergade 31. Aarhus 8000, Denmark"));
-        }else{Toast.makeText(this,"Wifi or Mobile network has to be turned on", Toast.LENGTH_SHORT).show();}
-
+     new setPinsOnMap().execute();
     }
-
+/*
     public void click(View v) {
         switch (v.getId()) {
             case R.id.normal:
@@ -234,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 break;
         }
     }
-
+*/
 
     public Location getLocation() {
         try {
@@ -370,5 +341,77 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private class setPinsOnMap extends AsyncTask<Void,Void,Void>
+    {
+        boolean connected=false;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            while(connected==false) {
+                NetworkInfo ni = cm.getActiveNetworkInfo();
+                if (ni!=null ) {
+                    if( ni.isConnectedOrConnecting()) {
+                        connected = true;
+                        /*try {
+                            Thread.sleep(60000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }*/
+                    }
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            boolean mobileDataEnabled = false; // Assume disabled
+            map.setMyLocationEnabled(true);
+            updateUI();
+
+            WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+
+            try {
+                Class cmClass = Class.forName(cm.getClass().getName());
+                Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
+                method.setAccessible(true); // Make the method callable
+                // get the setting for "mobile data"
+                mobileDataEnabled = (Boolean) method.invoke(cm);
+            } catch (Exception e) {
+                // Some problem accessible private API
+                // TODO do whatever error handling you want here
+            }
+            if (mobileDataEnabled || wifi.isWifiEnabled()) {
+
+                if(connected) {
+                    map.addMarker(new MarkerOptions()
+                            .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
+                            .title("Hybenvej 133. Horsens 8700, Denmark"));
+                    map.addMarker(new MarkerOptions()
+                            .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
+                            .title("Vestergade 31. Aarhus 8000, Denmark"));
+
+                }
+
+            } else {
+                Toast.makeText(MainActivity.this, "Wifi or Mobile network has to be turned on", Toast.LENGTH_SHORT).show();
+            }
+
+
+        }
     }
 }

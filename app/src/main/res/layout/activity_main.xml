@@ -28,7 +28,7 @@
             android:layout_alignTop="@+id/locationBtn"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:text="Events nearby you"
+            android:text="Events near you"
             android:textColor="@color/com_facebook_button_background_color_focused"
             android:textSize="18dp" />
 
