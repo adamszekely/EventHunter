@@ -22,6 +22,9 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -34,6 +37,12 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class FacebookActivity extends FragmentActivity {
 
     LoginButton loginButton;
@@ -43,10 +52,16 @@ public class FacebookActivity extends FragmentActivity {
     Context mContext;
     DialogFragment wcd;
     NetworkInfo ni;
+    Intent main;
+
+    private String firstName,lastName, email,birthday,gender;
+    private URL profilePicture;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_facebook);
         mContext = this.getApplicationContext();
         cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -59,10 +74,46 @@ public class FacebookActivity extends FragmentActivity {
         mAuth = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
         loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
-        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+        FacebookCallback<LoginResult> callback = new FacebookCallback<LoginResult>() {
 
             @Override
             public void onSuccess(LoginResult loginResult) {
+                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback(){
+
+                            @Override
+                            public void onCompleted(JSONObject object, GraphResponse response) {
+                                try {
+                                    userId = object.getString("id");
+                                    profilePicture = new URL("https://graph.facebook.com/" + userId + "/picture?width=500&height=500");
+                                    if(object.has("first_name"))
+                                        firstName = object.getString("first_name");
+                                    if(object.has("last_name"))
+                                        lastName = object.getString("last_name");
+                                    if (object.has("email"))
+                                        email = object.getString("email");
+                                    if (object.has("birthday"))
+                                        birthday = object.getString("birthday");
+                                    if (object.has("gender"))
+                                        gender = object.getString("gender");
+
+                                    main = new Intent(FacebookActivity.this,MainActivity.class);
+                                    main.putExtra("name",firstName);
+                                    main.putExtra("surname",lastName);
+                                    main.putExtra("imageUrl",profilePicture.toString());
+                                    //startActivity(main);
+                                    //finish();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (MalformedURLException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        });
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id, first_name, last_name, email, birthday, gender");
+                request.setParameters(parameters);
+                request.executeAsync();
                 Log.d("facebookLoginSuccess", "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 loginButton.setVisibility(View.INVISIBLE);
@@ -77,7 +128,9 @@ public class FacebookActivity extends FragmentActivity {
             public void onError(FacebookException exception) {
                 Log.d("facebookLoginError", "facebook:onError", exception);
             }
-        });
+        };
+        loginButton.setReadPermissions("email", "user_birthday","user_posts");
+        loginButton.registerCallback(callbackManager, callback);
         mAuth = FirebaseAuth.getInstance();
 
     }
@@ -95,11 +148,11 @@ public class FacebookActivity extends FragmentActivity {
                 } else {
 
                     if (ni != null) {
-                        Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
-                        startActivity(intent);
+                        //Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
+                        startActivity(main);
                         finish();
                     } else {
-                        wcd.show(getSupportFragmentManager(),"Connection");
+                        wcd.show(getSupportFragmentManager(), "Connection");
 
                     }
                 }
@@ -111,14 +164,11 @@ public class FacebookActivity extends FragmentActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         callbackManager.onActivityResult(requestCode, resultCode, data);
-
     }
-
 
     // [START auth_with_facebook]
     private void handleFacebookAccessToken(AccessToken token) {
         Log.d("AccessToken", "handleFacebookAccessToken:" + token);
-
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
