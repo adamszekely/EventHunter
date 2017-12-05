@@ -231,11 +231,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
         while (!noData[0] == true);
 
-        //for (int i = 0; i < pagesList.size(); i++) {
-
-        getEvents("276647152520368");
-        Log.d("Pagelist", pagesList.get(0) + "here");
-        //}
+        for (int i = 0; i < pagesList.size(); i++) {
+            getEvents(pagesList.get(i));
+            //Log.d("Pagelist", pagesList.get(0) + "here");
+        }
     }
 
     private void getEvents(String pageId) {
@@ -257,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             JSONObject jsonObject = response.getJSONObject();
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
-                                if (response!=null) {
+                                if (response != null) {
                                     JSONArray eventsArray = jsonObject.getJSONArray("data");
                                     if (eventsArray.length() == 0) {
                                         Log.d("Pagelist", "Page list is empty");
@@ -273,15 +272,17 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                             //end
                                             Date now = new Date(System.currentTimeMillis());
                                             if (date.after(now)) {
-                                                //Retrieving the location of an event
-                                                JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
-                                                double lat = locationObj.getDouble("latitude");
-                                                double lng = locationObj.getDouble("longitude");
-                                                //end
-                                                // Log.d("JSON2", event.getString("id")+", "+ event.getString("name"));
-                                                Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
-                                                eventsList.add(eventObj);
-                                                Log.d("JSONEvent", eventObj.name.toString());
+                                                if (event.getJSONObject("place").has("location")) {
+                                                    //Retrieving the location of an event
+                                                    JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
+                                                    double lat = locationObj.getDouble("latitude");
+                                                    double lng = locationObj.getDouble("longitude");
+                                                    //end
+                                                    // Log.d("JSON2", event.getString("id")+", "+ event.getString("name"));
+                                                    Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
+                                                    eventsList.add(eventObj);
+                                                    Log.d("JSONEvent", eventObj.name.toString());
+                                                }else isEventOld[0] = true;
                                             } else isEventOld[0] = true;
                                         }
 
@@ -307,10 +308,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         }
                     }
             ).executeAndWait();
-            Log.d("Pagelist",noData[0]+"");
+            Log.d("Pagelist", noData[0] + "");
         }
-        //!!!!!!!!!!!!!no double condition
-        while (noData[0] == false || isEventOld[0] == false);
+
+        while (noData[0] == false && isEventOld[0] == false);
 
     }
 
