@@ -64,7 +64,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements android.location.LocationListener, OnMapReadyCallback {
@@ -79,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
     AccessToken accessToken;
     private String userId;
     private List<String> pagesList;
+    private List<Event> eventsList;
+    private boolean arePagesDone = false;
 
 
     // Flag for GPS status
@@ -119,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
         accessToken = AccessToken.getCurrentAccessToken();
         pagesList = new ArrayList<String>();
+        eventsList = new ArrayList<Event>();
         //End of initializations
 
         toolbar.setTitle("");
@@ -202,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                         Log.d("JSON", page.getString("id"));
 
                                     }
-                                    Log.d("JSON", pagesIdArray.length()+"");
+                                    Log.d("JSON", pagesIdArray.length() + "");
 
                                     //Get the next page of ids from JSONObject
                                     if (!jsonObject.isNull("paging")) {
@@ -225,7 +231,89 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
         while (!noData[0] == true);
 
+        //for (int i = 0; i < pagesList.size(); i++) {
+
+        getEvents("276647152520368");
+        Log.d("Pagelist", pagesList.get(0) + "here");
+        //}
     }
+
+    private void getEvents(String pageId) {
+        final String[] afterString = {""};  // will contain the next page cursor
+        final Boolean[] noData = {false};// stop when there is no after cursor
+        final Boolean[] isEventOld = {false};
+
+        do {
+            Log.d("Pagelist", "inside getEvents");
+            Bundle params = new Bundle();
+            params.putString("after", afterString[0]);
+            new GraphRequest(
+                    accessToken,
+                    pageId + "/events?fields=id,place,name,start_time",
+                    params,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject jsonObject = response.getJSONObject();
+                            //Add all the ids of the pages a user likes into an arraylist
+                            try {
+                                if (response!=null) {
+                                    JSONArray eventsArray = jsonObject.getJSONArray("data");
+                                    if (eventsArray.length() == 0) {
+                                        Log.d("Pagelist", "Page list is empty");
+                                        noData[0] = true;
+                                    } else {
+                                        for (int i = 0; i < eventsArray.length(); i++) {
+                                            JSONObject event = eventsArray.getJSONObject(i);
+                                            //Parsing a date in a string to a Date type
+                                            String strDate = event.getString("start_time");
+                                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                                            Date date = dateFormat.parse(strDate);
+
+                                            //end
+                                            Date now = new Date(System.currentTimeMillis());
+                                            if (date.after(now)) {
+                                                //Retrieving the location of an event
+                                                JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
+                                                double lat = locationObj.getDouble("latitude");
+                                                double lng = locationObj.getDouble("longitude");
+                                                //end
+                                                // Log.d("JSON2", event.getString("id")+", "+ event.getString("name"));
+                                                Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
+                                                eventsList.add(eventObj);
+                                                Log.d("JSONEvent", eventObj.name.toString());
+                                            } else isEventOld[0] = true;
+                                        }
+
+
+                                        //Get the next page of ids from JSONObject
+                                        if (!jsonObject.isNull("paging")) {
+                                            JSONObject paging = jsonObject.getJSONObject("paging");
+                                            JSONObject cursors = paging.getJSONObject("cursors");
+                                            if (!cursors.isNull("after"))
+                                                afterString[0] = cursors.getString("after");
+                                            else
+                                                noData[0] = true;
+                                        } else
+                                            noData[0] = true;
+                                    }
+                                } else
+                                    noData[0] = true;
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            ).executeAndWait();
+            Log.d("Pagelist",noData[0]+"");
+        }
+        //!!!!!!!!!!!!!no double condition
+        while (noData[0] == false || isEventOld[0] == false);
+
+    }
+
 
     public void updateUI() {
         if (currentLocation != null) {
@@ -458,18 +546,22 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    private class getPagesAsync extends AsyncTask<Void,Void,Void>{
+    private class getPagesAsync extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
             getPages();
+            /*if (arePagesDone) {
+
+            }*/
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.d("JSON", pagesList.size()+"");
+            Log.d("JSON", pagesList.size() + "");
+            Log.d("JSONEvent", eventsList.size() + "");
         }
     }
 }
