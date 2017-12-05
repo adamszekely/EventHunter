@@ -2,8 +2,11 @@ package com.example.adam.eventhunter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -52,11 +55,6 @@ public class FacebookActivity extends FragmentActivity {
     Context mContext;
     DialogFragment wcd;
     NetworkInfo ni;
-    Intent main;
-
-    private String firstName,lastName, email,birthday,gender;
-    private URL profilePicture;
-    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,44 +74,9 @@ public class FacebookActivity extends FragmentActivity {
         loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
         FacebookCallback<LoginResult> callback = new FacebookCallback<LoginResult>() {
 
+
             @Override
             public void onSuccess(LoginResult loginResult) {
-                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback(){
-
-                            @Override
-                            public void onCompleted(JSONObject object, GraphResponse response) {
-                                try {
-                                    userId = object.getString("id");
-                                    profilePicture = new URL("https://graph.facebook.com/" + userId + "/picture?width=500&height=500");
-                                    if(object.has("first_name"))
-                                        firstName = object.getString("first_name");
-                                    if(object.has("last_name"))
-                                        lastName = object.getString("last_name");
-                                    if (object.has("email"))
-                                        email = object.getString("email");
-                                    if (object.has("birthday"))
-                                        birthday = object.getString("birthday");
-                                    if (object.has("gender"))
-                                        gender = object.getString("gender");
-
-                                    main = new Intent(FacebookActivity.this,MainActivity.class);
-                                    main.putExtra("name",firstName);
-                                    main.putExtra("surname",lastName);
-                                    main.putExtra("imageUrl",profilePicture.toString());
-                                    //startActivity(main);
-                                    //finish();
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                } catch (MalformedURLException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                        });
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id, first_name, last_name, email, birthday, gender");
-                request.setParameters(parameters);
-                request.executeAsync();
                 Log.d("facebookLoginSuccess", "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 loginButton.setVisibility(View.INVISIBLE);
@@ -129,10 +92,11 @@ public class FacebookActivity extends FragmentActivity {
                 Log.d("facebookLoginError", "facebook:onError", exception);
             }
         };
-        loginButton.setReadPermissions("email", "user_birthday","user_posts");
         loginButton.registerCallback(callbackManager, callback);
         mAuth = FirebaseAuth.getInstance();
 
+        //Request permission to see the user's liked pages and events
+        loginButton.setReadPermissions("user_likes", "user_events");
     }
 
     @Override
@@ -148,8 +112,8 @@ public class FacebookActivity extends FragmentActivity {
                 } else {
 
                     if (ni != null) {
-                        //Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
-                        startActivity(main);
+                        Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
+                        startActivity(intent);
                         finish();
                     } else {
                         wcd.show(getSupportFragmentManager(), "Connection");
