@@ -18,7 +18,7 @@
         android:theme="@style/NoActionBarTheme">
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -50,7 +50,7 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".CalendarActivity"></activity>
+        <activity android:name=".CalendarActivity" />
     </application>
 
 </manifest>
