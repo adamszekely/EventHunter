@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -31,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private ThreadPoolExecutor executor;
     private Date now;
     private BottomNavigationView bottomNavigationMenuView;
+    private ProgressBar progressBar;
     // Flag for GPS status
     boolean isGPSEnabled = false;
     // Flag for network status
@@ -136,6 +139,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
         eventsList = new ArrayList<Event>();
         executor = new ThreadPoolExecutor(10, 15, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
         now = new Date(System.currentTimeMillis());
+        progressBar = (ProgressBar) findViewById(R.id.progressBar2);
+        int colorCodeDark = Color.parseColor("#FF4052B5");
+        progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
         //End of initializations
 
         toolbar.setTitle("");
@@ -529,6 +535,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     }
                 }
             }
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -587,5 +594,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-
+//me/events/maybe?fields=id,place,name,start_time
+//me/events/attending?fields=id,place,name,start_time
+//me/events/not_replied?fields=id,place,name,start_time
 }

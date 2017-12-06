@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     tools:context="com.example.adam.eventhunter.MainActivity">
 
+
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
@@ -108,4 +110,18 @@
         app:menu="@menu/bottom_nav_menu">
 
     </android.support.design.widget.BottomNavigationView>
+
+    <ProgressBar
+        android:id="@+id/progressBar2"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/menu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/map" />
 </android.support.constraint.ConstraintLayout>
