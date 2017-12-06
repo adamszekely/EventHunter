@@ -272,18 +272,20 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                             //end
                                             Date now = new Date(System.currentTimeMillis());
                                             if (date.after(now)) {
-                                                if (event.getJSONObject("place").has("location")) {
-                                                    //Retrieving the location of an event
-                                                    JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
-                                                    double lat = locationObj.getDouble("latitude");
-                                                    double lng = locationObj.getDouble("longitude");
-                                                    //end
-                                                    // Log.d("JSON2", event.getString("id")+", "+ event.getString("name"));
-                                                    Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
-                                                    eventsList.add(eventObj);
-                                                    Log.d("JSONEvent", eventObj.name.toString());
-                                                }else isEventOld[0] = true;
-                                            } else isEventOld[0] = true;
+                                                if (event.has("place")) {
+                                                    if (event.getJSONObject("place").has("location")) {
+                                                        //Retrieving the location of an event
+                                                        JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
+                                                        double lat = locationObj.getDouble("latitude");
+                                                        double lng = locationObj.getDouble("longitude");
+                                                        //end
+                                                        // Log.d("JSON2", event.getString("id")+", "+ event.getString("name"));
+                                                        Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
+                                                        eventsList.add(eventObj);
+                                                        Log.d("JSONEvent", eventObj.name.toString());
+                                                    } else noData[0] = true;
+                                                } else noData[0] = true;
+                                            }else isEventOld[0] = true;
                                         }
 
 
