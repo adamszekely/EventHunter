@@ -2,6 +2,7 @@ package com.example.adam.eventhunter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
@@ -12,6 +13,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.internal.BottomNavigationMenuView;
@@ -33,6 +35,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,31 +58,38 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements android.location.LocationListener, OnMapReadyCallback {
     private GoogleMap map;
-    private TextView textView;
-    protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
     private LatLng newLocation;
-    private Location mLastLocation, currentLocation;
-    private boolean mRequestingLocationUpdates;
-    private LocationCallback mLocationCallback;
-    private FusedLocationProviderClient mFusedLocationClient;
+    private Location currentLocation;
     private Toolbar toolbar;
     private Context mContext;
     private FirebaseAuth mAuth;
     ConnectivityManager cm;
+    AccessToken accessToken;
+    private String userId;
+    private List<String> pagesList;
+    private List<Event> eventsList;
+    private boolean arePagesDone = false;
+
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
-
     // Flag for network status
     boolean isNetworkEnabled = false;
-
     // Flag for GPS status
     boolean canGetLocation = false;
 
@@ -85,24 +98,17 @@ public class MainActivity extends AppCompatActivity implements android.location.
     double longitude; // Longitude
 
     // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 10 meters
-
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 1 meter
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 1; // 1 minute
-
     // Declaring a Location Manager
     protected LocationManager locationManager;
-
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Initializations
         createLocationRequest();
         setContentView(R.layout.activity_main);
         mContext = this.getApplicationContext();
@@ -111,11 +117,20 @@ public class MainActivity extends AppCompatActivity implements android.location.
         mapFragment.getMapAsync(this);
         mAuth = FirebaseAuth.getInstance();
         currentLocation = getLocation();
-        setTitle("");
+        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         toolbar = (Toolbar) findViewById(R.id.toolBar);
+        Spinner dynamicSpinner = (Spinner) findViewById(R.id.dynamic_spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
+        accessToken = AccessToken.getCurrentAccessToken();
+        pagesList = new ArrayList<String>();
+        eventsList = new ArrayList<Event>();
+        //End of initializations
+
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
+
+        //Bottom navigation menu
         bottomNavigationMenuView.setItemIconTintList(null);
         bottomNavigationMenuView.setSelectedItemId(R.id.nav_map);
         bottomNavigationMenuView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -135,16 +150,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 return true;
             }
         });
+        //End of bottom navigation menu
 
-        Spinner dynamicSpinner = (Spinner) findViewById(R.id.dynamic_spinner);
-
-        String[] items = new String[]{"Chai Latte", "Green Tea", "Black Tea"};
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
-
+        //Map type drop-down list
         dynamicSpinner.setAdapter(adapter);
-
         dynamicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -169,7 +178,145 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 // TODO Auto-generated method stub
             }
         });
+        //End of map type drop-down list
+
+
     }
+
+
+    private void getPages() {
+        final String[] afterString = {""};  // will contain the next page cursor
+        final Boolean[] noData = {false};   // stop when there is no after cursor
+        do {
+            Bundle params = new Bundle();
+            params.putString("after", afterString[0]);
+            new GraphRequest(
+                    accessToken,
+                    "/me/likes?fields=id",
+                    params,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject jsonObject = response.getJSONObject();
+                            //Add all the ids of the pages a user likes into an arraylist
+                            try {
+                                if (response != null) {
+                                    JSONArray pagesIdArray = jsonObject.getJSONArray("data");
+                                    for (int i = 0; i < pagesIdArray.length(); i++) {
+                                        JSONObject page = pagesIdArray.getJSONObject(i);
+                                        pagesList.add(page.getString("id"));
+                                        Log.d("JSON", page.getString("id"));
+
+                                    }
+                                    Log.d("JSON", pagesIdArray.length() + "");
+
+                                    //Get the next page of ids from JSONObject
+                                    if (!jsonObject.isNull("paging")) {
+                                        JSONObject paging = jsonObject.getJSONObject("paging");
+                                        JSONObject cursors = paging.getJSONObject("cursors");
+                                        if (!cursors.isNull("after"))
+                                            afterString[0] = cursors.getString("after");
+                                        else
+                                            noData[0] = true;
+                                    } else
+                                        noData[0] = true;
+
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            ).executeAndWait();
+        }
+        while (!noData[0] == true);
+
+        for (int i = 0; i < pagesList.size(); i++) {
+            getEvents(pagesList.get(i));
+            //Log.d("Pagelist", pagesList.get(0) + "here");
+        }
+    }
+
+    private void getEvents(String pageId) {
+        final String[] afterString = {""};  // will contain the next page cursor
+        final Boolean[] noData = {false};// stop when there is no after cursor
+        final Boolean[] isEventOld = {false};
+
+        do {
+            Log.d("Pagelist", "inside getEvents");
+            Bundle params = new Bundle();
+            params.putString("after", afterString[0]);
+            new GraphRequest(
+                    accessToken,
+                    pageId + "/events?fields=id,place,name,start_time",
+                    params,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject jsonObject = response.getJSONObject();
+                            //Add all the ids of the pages a user likes into an arraylist
+                            try {
+                                if (response != null) {
+                                    JSONArray eventsArray = jsonObject.getJSONArray("data");
+                                    if (eventsArray.length() == 0) {
+                                        Log.d("Pagelist", "Page list is empty");
+                                        noData[0] = true;
+                                    } else {
+                                        for (int i = 0; i < eventsArray.length(); i++) {
+                                            JSONObject event = eventsArray.getJSONObject(i);
+                                            //Parsing a date in a string to a Date type
+                                            String strDate = event.getString("start_time");
+                                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                                            Date date = dateFormat.parse(strDate);
+
+                                            //end
+                                            Date now = new Date(System.currentTimeMillis());
+                                            if (date.after(now)) {
+                                                if (event.has("place")) {
+                                                    if (event.getJSONObject("place").has("location")) {
+                                                        //Retrieving the location of an event
+                                                        JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
+                                                        double lat = locationObj.getDouble("latitude");
+                                                        double lng = locationObj.getDouble("longitude");
+                                                        //end
+                                                        // Log.d("JSON2", event.getString("id")+", "+ event.getString("name"));
+                                                        Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
+                                                        eventsList.add(eventObj);
+                                                        Log.d("JSONEvent", eventObj.name.toString());
+                                                    } else noData[0] = true;
+                                                } else noData[0] = true;
+                                            }else isEventOld[0] = true;
+                                        }
+
+
+                                        //Get the next page of ids from JSONObject
+                                        if (!jsonObject.isNull("paging")) {
+                                            JSONObject paging = jsonObject.getJSONObject("paging");
+                                            JSONObject cursors = paging.getJSONObject("cursors");
+                                            if (!cursors.isNull("after"))
+                                                afterString[0] = cursors.getString("after");
+                                            else
+                                                noData[0] = true;
+                                        } else
+                                            noData[0] = true;
+                                    }
+                                } else
+                                    noData[0] = true;
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            ).executeAndWait();
+            Log.d("Pagelist", noData[0] + "");
+        }
+
+        while (noData[0] == false && isEventOld[0] == false);
+
+    }
+
 
     public void updateUI() {
         if (currentLocation != null) {
@@ -189,23 +336,21 @@ public class MainActivity extends AppCompatActivity implements android.location.
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
+        updateUI();
+        new getPagesAsync().execute();
         new setPinsOnMap().execute();
     }
-/*
-    public void click(View v) {
-        switch (v.getId()) {
-            case R.id.normal:
-                map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                break;
-            case R.id.satellite:
-                map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                break;
-            case R.id.hybrid:
-                map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-                break;
-        }
-    }
-*/
 
     public Location getLocation() {
         try {
@@ -305,6 +450,13 @@ public class MainActivity extends AppCompatActivity implements android.location.
         return p1;
     }
 
+    protected void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
     @Override
     public void onLocationChanged(Location location) {
 
@@ -364,19 +516,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
+
             boolean mobileDataEnabled = false; // Assume disabled
-            map.setMyLocationEnabled(true);
-            updateUI();
+
 
             WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
@@ -393,12 +535,18 @@ public class MainActivity extends AppCompatActivity implements android.location.
             if (mobileDataEnabled || wifi.isWifiEnabled()) {
 
                 if (connected) {
-                    map.addMarker(new MarkerOptions()
+                    for(int i=0; i<eventsList.size();i++)
+                    {
+                        map.addMarker(new MarkerOptions()
+                                .position(new LatLng(eventsList.get(i).lat,eventsList.get(i).lng))
+                                .title(eventsList.get(i).name));
+                    }
+                   /* map.addMarker(new MarkerOptions()
                             .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
                             .title("Hybenvej 133. Horsens 8700, Denmark"));
                     map.addMarker(new MarkerOptions()
                             .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
-                            .title("Vestergade 31. Aarhus 8000, Denmark"));
+                            .title("Vestergade 31. Aarhus 8000, Denmark"));*/
 
                 }
 
@@ -407,6 +555,25 @@ public class MainActivity extends AppCompatActivity implements android.location.
             }
 
 
+        }
+    }
+
+    private class getPagesAsync extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            getPages();
+            /*if (arePagesDone) {
+
+            }*/
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d("JSON", pagesList.size() + "");
+            Log.d("JSONEvent", eventsList.size() + "");
         }
     }
 }
