@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private double listLength;
     private ThreadPoolExecutor executor;
     private Date now;
+    private BottomNavigationView bottomNavigationMenuView;
     // Flag for GPS status
     boolean isGPSEnabled = false;
     // Flag for network status
@@ -125,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         mapFragment.getMapAsync(this);
         mAuth = FirebaseAuth.getInstance();
         currentLocation = getLocation();
-        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
+        bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         toolbar = (Toolbar) findViewById(R.id.toolBar);
         Spinner dynamicSpinner = (Spinner) findViewById(R.id.dynamic_spinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -133,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         accessToken = AccessToken.getCurrentAccessToken();
         pagesList = new ArrayList<String>();
         eventsList = new ArrayList<Event>();
-        executor = new ThreadPoolExecutor(4, 5, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
+        executor = new ThreadPoolExecutor(10, 15, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
         now = new Date(System.currentTimeMillis());
         //End of initializations
 
@@ -151,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_map:
-
                         break;
                     case R.id.nav_calendar:
                         Intent intent3 = new Intent(MainActivity.this, CalendarActivity.class);
@@ -242,18 +242,12 @@ public class MainActivity extends AppCompatActivity implements android.location.
         //Using the ThreadPoolExecutor, the threads run simultaneously so retrieving the events is fast
         if (pagesList.size() > 25) {
             start = 0;
-            listLength = pagesList.size() / 4;
-            new getEventsAsync().executeOnExecutor(executor, (int) listLength, start);
-            start = (int) listLength;
-            listLength = pagesList.size() / 2;
-            new getEventsAsync().executeOnExecutor(executor, (int) listLength, start);
-            start = (int) listLength;
-            listLength = pagesList.size() * 0.75;
-            new getEventsAsync().executeOnExecutor(executor, (int) listLength, start);
-            start = (int) listLength;
-            listLength = pagesList.size() / 1;
-            new getEventsAsync().executeOnExecutor(executor, (int) listLength, start);
-
+            for(int i=0;i<10;i++)
+            {
+                listLength=pagesList.size()*((i+1)*0.1);
+                new getEventsAsync().executeOnExecutor(executor, (int) listLength, start);
+                start=(int) listLength;
+            }
         } else {
             //Use this if the user has less than 25 liked pages
             new getAllEventsAsync().execute();
@@ -261,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
     }
 
-    private void getEvents(String pageId) {
+    private void getEvents(final String pageId) {
         final String[] afterString = {""};  // will contain the next page cursor
         final Boolean[] noData = {false};// stop when there is no after cursor
         final Boolean[] isEventOld = {false};// stop when an event is older than today
@@ -278,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     new GraphRequest.Callback() {
                         public void onCompleted(GraphResponse response) {
                             JSONObject jsonObject = response.getJSONObject();
+                            Log.d("PAGEID2", pageId + "");
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
                                 if (response != null) {
@@ -288,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                     } else {
                                         for (int i = 0; i < eventsArray.length(); i++) {
                                             JSONObject event = eventsArray.getJSONObject(i);
+
                                             //Parsing a date in a string to a Date type
                                             String strDate = event.getString("start_time");
                                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
@@ -524,10 +520,12 @@ public class MainActivity extends AppCompatActivity implements android.location.
             if (connected) {
                 //Go through the list of events and add a pin to the map for each one
                 for (int i = 0; i < eventsList.size(); i++) {
-                    if (eventsList.get(i).date.before(tomorrow)) {
-                        map.addMarker(new MarkerOptions()
-                                .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                .title(eventsList.get(i).name));
+                    if (eventsList.get(i).date != null) {
+                        if (eventsList.get(i).date.before(tomorrow)) {
+                            map.addMarker(new MarkerOptions()
+                                    .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                    .title(eventsList.get(i).name));
+                        }
                     }
                 }
             }
@@ -566,7 +564,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.d("JSONEvent", eventsList.size() + "");
+
         }
     }
 

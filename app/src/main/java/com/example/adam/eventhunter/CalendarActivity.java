@@ -36,7 +36,7 @@ public class CalendarActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         bottomNavigationMenuView.setItemIconTintList(null);
-        bottomNavigationMenuView.setSelectedItemId(R.id.nav_map);
+        bottomNavigationMenuView.setSelectedItemId(R.id.nav_calendar);
         bottomNavigationMenuView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
