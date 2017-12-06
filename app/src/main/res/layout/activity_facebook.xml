@@ -10,6 +10,8 @@
     android:weightSum="4">
 
 
+
+
         <ImageView
             android:id="@+id/icon"
             android:layout_marginTop="100dp"
@@ -34,7 +36,12 @@
             android:onClick="facebookLoginClick"
             android:layout_marginTop="50dp"
             />
-
+        <ProgressBar
+            android:id="@+id/progressBar3"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"/>
 
 </LinearLayout>
 

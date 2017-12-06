@@ -3,6 +3,8 @@ package com.example.adam.eventhunter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceFragment;
@@ -18,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +58,7 @@ public class FacebookActivity extends FragmentActivity {
     Context mContext;
     DialogFragment wcd;
     NetworkInfo ni;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +68,9 @@ public class FacebookActivity extends FragmentActivity {
         mContext = this.getApplicationContext();
         cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         wcd = new WirelessConnectionDialogFragment();
-
+        progressBar = (ProgressBar) findViewById(R.id.progressBar3);
+        int colorCodeDark = Color.parseColor("#FF4052B5");
+        progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
 
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
@@ -80,6 +86,7 @@ public class FacebookActivity extends FragmentActivity {
                 Log.d("facebookLoginSuccess", "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
                 loginButton.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -142,7 +149,6 @@ public class FacebookActivity extends FragmentActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("SignInSuccess", "signInWithCredential:success");
-
 
                         } else {
                             // If sign in fails, display a message to the user.

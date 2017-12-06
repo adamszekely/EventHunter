@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     case R.id.nav_map:
                         break;
                     case R.id.nav_calendar:
+                        progressBar.setVisibility(View.VISIBLE);
                         Intent intent3 = new Intent(MainActivity.this, CalendarActivity.class);
                         startActivity(intent3);
                         finish();
