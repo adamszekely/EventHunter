@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         });
         //End of map type drop-down list
 
-        new getPagesAsync().execute();
+
     }
 
 
@@ -334,6 +334,19 @@ public class MainActivity extends AppCompatActivity implements android.location.
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
+        updateUI();
+        new getPagesAsync().execute();
         new setPinsOnMap().execute();
     }
 
@@ -501,19 +514,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
+
             boolean mobileDataEnabled = false; // Assume disabled
-            map.setMyLocationEnabled(true);
-            updateUI();
+
 
             WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
@@ -530,12 +533,18 @@ public class MainActivity extends AppCompatActivity implements android.location.
             if (mobileDataEnabled || wifi.isWifiEnabled()) {
 
                 if (connected) {
-                    map.addMarker(new MarkerOptions()
+                    for(int i=0; i<eventsList.size();i++)
+                    {
+                        map.addMarker(new MarkerOptions()
+                                .position(new LatLng(eventsList.get(i).lat,eventsList.get(i).lng))
+                                .title(eventsList.get(i).name));
+                    }
+                   /* map.addMarker(new MarkerOptions()
                             .position(getLocationFromAddress(mContext, "Hybenvej 133. Horsens 8700, Denmark"))
                             .title("Hybenvej 133. Horsens 8700, Denmark"));
                     map.addMarker(new MarkerOptions()
                             .position(getLocationFromAddress(mContext, "Vestergade 31. Aarhus 8000, Denmark"))
-                            .title("Vestergade 31. Aarhus 8000, Denmark"));
+                            .title("Vestergade 31. Aarhus 8000, Denmark"));*/
 
                 }
 
