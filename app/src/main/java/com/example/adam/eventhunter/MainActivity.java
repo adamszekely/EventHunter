@@ -43,6 +43,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.joda.time.DateTimeConstants;
+import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private String userId;
     private List<String> pagesList;
     private List<Event> eventsList;
-    private boolean arePagesDone = false;
+    private boolean today, weekend, threedays;
     private int start;
     private double listLength;
     private ThreadPoolExecutor executor;
@@ -110,9 +112,15 @@ public class MainActivity extends AppCompatActivity implements android.location.
         currentLocation = getLocation();
         bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         toolbar = (Toolbar) findViewById(R.id.toolBar);
-        Spinner dynamicSpinner = (Spinner) findViewById(R.id.dynamic_spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+
+        Spinner dynamicSpinnerMap = (Spinner) findViewById(R.id.dynamic_spinner_map_type);
+        ArrayAdapter<String> adapterMap = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
+
+        Spinner dynamicSpinnerDates = (Spinner) findViewById(R.id.dynamic_spinner_dates);
+        ArrayAdapter<String> adapterDates = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.dates_array));
+
         accessToken = AccessToken.getCurrentAccessToken();
         pagesList = new ArrayList<String>();
         eventsList = new ArrayList<Event>();
@@ -151,8 +159,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
         //End of bottom navigation menu
 
         //Map type drop-down list
-        dynamicSpinner.setAdapter(adapter);
-        dynamicSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        dynamicSpinnerMap.setAdapter(adapterMap);
+        dynamicSpinnerMap.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
@@ -177,6 +185,45 @@ public class MainActivity extends AppCompatActivity implements android.location.
             }
         });
         //End of map type drop-down list
+
+        dynamicSpinnerDates.setAdapter(adapterDates);
+        dynamicSpinnerDates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
+                //((TextView) parent.getChildAt(0)).setTextSize(20);
+                switch ((String) parent.getItemAtPosition(position)) {
+                    case "Today":
+                        today = true;
+                        weekend = false;
+                        threedays = false;
+                        progressBar.setVisibility(View.VISIBLE);
+                        new setPinsOnMap().execute();
+                        break;
+                    case "Weekend":
+                        today = false;
+                        weekend = true;
+                        threedays = false;
+                        progressBar.setVisibility(View.VISIBLE);
+                        new setPinsOnMap().execute();
+                        break;
+                    case "3 days":
+                        today = false;
+                        weekend = false;
+                        threedays = true;
+                        progressBar.setVisibility(View.VISIBLE);
+                        new setPinsOnMap().execute();
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     private void getPages() {
@@ -592,23 +639,71 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-            Date tomorrow = calendar.getTime();
+            LocalDate nowTime=new LocalDate();
+            map.clear();
             if (connected) {
-                //Go through the list of events and add a pin to the map for each one
-                for (int i = 0; i < eventsList.size(); i++) {
-                    if (eventsList.get(i).startDate != null) {
-                        if (eventsList.get(i).startDate.before(tomorrow)) {
-                            Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
-                            if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
-                                map.addMarker(new MarkerOptions()
-                                        .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                        .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                            } else {
-                                map.addMarker(new MarkerOptions()
-                                        .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                        .title(eventsList.get(i).name));
+                if (today == true) {
+                    Date tomorrow = nowTime.plusDays( 1 ).toDate();
+                    Log.d("TIMES2", tomorrow + " TOMORROW");
+                    //Go through the list of events and add a pin to the map for each one
+                    for (int i = 0; i < eventsList.size(); i++) {
+                        if (eventsList.get(i).startDate != null) {
+                            if (eventsList.get(i).startDate.before(tomorrow)) {
+                                Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
+                                if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                } else {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).name));
+                                }
+                            }
+                        }
+                    }
+                } else if (weekend == true) {
+                    int old = nowTime.getDayOfWeek();
+                    LocalDate next = nowTime.plusDays(8 - old);
+                    Date thursday = nowTime.withDayOfWeek(DateTimeConstants.THURSDAY).toDate();
+                    Date monday = next.toDate();
+
+                    Log.d("TIMES2", monday + ", " + thursday);
+                    //Go through the list of events and add a pin to the map for each one
+                    for (int i = 0; i < eventsList.size(); i++) {
+                        if (eventsList.get(i).startDate != null) {
+                            if (eventsList.get(i).startDate.before(monday) /*&& eventsList.get(i).startDate.after(thursday) && eventsList.get(i).endDate.after(thursday)*/) {
+
+                                if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                } else {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).name));
+                                }
+                            }
+                        }
+                    }
+                } else if (threedays == true) {
+
+                    Date three = nowTime.plusDays( 3 ).toDate();;
+                    Log.d("TIMES2", three + " THREE");
+                    //Go through the list of events and add a pin to the map for each one
+                    for (int i = 0; i < eventsList.size(); i++) {
+                        if (eventsList.get(i).startDate != null) {
+                            if (eventsList.get(i).startDate.before(three)) {
+                                Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
+                                if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                } else {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).name));
+                                }
                             }
                         }
                     }

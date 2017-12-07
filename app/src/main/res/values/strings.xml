@@ -90,6 +90,12 @@
         <item>Hybrid</item>
     </string-array>
 
+    <string-array name="dates_array">
+        <item>Today</item>
+        <item>Weekend</item>
+        <item>3 days</item>
+    </string-array>
+
     <string name="wireless_dialog">Mobile network or Wi-Fi needs to be turned on</string>
     <string name="positive_button">Turn on</string>
     <string name="negative_button">Cancel</string>
