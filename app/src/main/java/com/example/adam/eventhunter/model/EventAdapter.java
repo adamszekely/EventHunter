@@ -43,9 +43,6 @@ public class EventAdapter extends ArrayAdapter<EventActivity> {
         TextView date = (TextView) listItemView.findViewById(R.id.date);
         date.setText(currentEvent.getDate());
 
-        TextView time = (TextView) listItemView.findViewById(R.id.time);
-        time.setText(currentEvent.getTime());
-
         TextView address = (TextView) listItemView.findViewById(R.id.address);
         address.setText(currentEvent.getAddress());
 

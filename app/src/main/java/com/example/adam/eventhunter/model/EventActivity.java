@@ -12,18 +12,14 @@ public class EventActivity {
 
    private String title;
    private String date;
-   private String time;
    private String address;
-    private  Button detailsButton;
     private Drawable image;
 
-   public EventActivity(String title, String date, String time, String address, Button detailsButton, Drawable image){
+   public EventActivity(String title, String date, String address, Drawable image){
        this.image = image;
        this.title = title;
        this.date = date;
-       this.time = time;
        this.address = address;
-       this.detailsButton = detailsButton;
     }
 
     public String getTitle() {
@@ -42,28 +38,12 @@ public class EventActivity {
         this.date = date;
     }
 
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
     public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public Button getDetailsButton() {
-        return detailsButton;
-    }
-
-    public void setDetailsButton(Button detailsButton) {
-        this.detailsButton = detailsButton;
     }
 
     public Drawable getImage() {
