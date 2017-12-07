@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private String userId;
     private List<String> pagesList;
     private List<Event> eventsList;
-    private boolean today, weekend, threedays;
+    private boolean today, weekend, threedays,downloaded;
     private int start;
     private double listLength;
     private ThreadPoolExecutor executor;
@@ -90,8 +91,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private ProgressBar progressBar;
     private TextView title, address, date;
     private ImageView image;
-    private String mTitle,mAddress,mDate;
+    private String mTitle, mAddress, mDate;
     private Drawable drawable;
+    private Marker mMarker;
+    int colorCodeDark;
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
@@ -141,8 +144,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
         executor = new ThreadPoolExecutor(12, 20, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
         now = new Date(System.currentTimeMillis());
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
-        int colorCodeDark = Color.parseColor("#FF4052B5");
+        colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
+
+
         //End of initializations
 
         toolbar.setTitle("");
@@ -346,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                     if (event.has("place")) {
                                                         //Only save events if it has a location object inside the place object in the JSON
                                                         if (event.getJSONObject("place").has("location")) {
-                                                            Log.d("ALLEVENTS",event.getString("name"));
+                                                            Log.d("ALLEVENTS", event.getString("name"));
                                                             //Retrieving the location of an event
                                                             JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
                                                             double lat = locationObj.getDouble("latitude");
@@ -499,40 +504,48 @@ public class MainActivity extends AppCompatActivity implements android.location.
         map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
             @Override
             public View getInfoWindow(Marker marker) {
+
+                mMarker = marker;
+                if(downloaded==false) {
+                    new getEventDetailsAsync().execute(mMarker.getTitle());
+                }
                 return null;
             }
 
             @Override
             public View getInfoContents(Marker marker) {
-                new getEventDetailsAsync().execute(marker.getTitle());
-                drawable=null;
                 View v = getLayoutInflater().inflate(R.layout.activity_preview, null);
+                ProgressBar progressBarInfo = (ProgressBar) v.findViewById(R.id.progressBar4);
+                progressBarInfo.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
+                progressBarInfo.setVisibility(View.VISIBLE);
                 title = (TextView) v.findViewById(R.id.title);
                 address = (TextView) v.findViewById(R.id.address);
                 date = (TextView) v.findViewById(R.id.date);
                 image = (ImageView) v.findViewById(R.id.image);
-                while(drawable==null){
-                }
-                title.setText(mTitle);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                try {
-                    Date myDate=dateFormat.parse(mDate);
-                    dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    String finalDate=dateFormat.format(myDate);
-                    date.setText(finalDate);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
 
-                address.setText(mAddress);
-                image.setImageDrawable(drawable);
+                if (downloaded==true) {
+                    title.setText(mTitle);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    try {
+                        Date myDate = dateFormat.parse(mDate);
+                        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                        String finalDate = dateFormat.format(myDate);
+                        date.setText(finalDate);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    address.setText(mAddress);
+                    image.setImageDrawable(drawable);
+                downloaded=false;
+                progressBarInfo.setVisibility(View.INVISIBLE);
+                }
                 return v;
             }
         });
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Toast.makeText(MainActivity.this,"Implementation later",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -841,7 +854,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    private class getEventDetailsAsync extends AsyncTask<String,Void,Void> {
+    private class getEventDetailsAsync extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -858,15 +871,15 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             //Add all the ids of the pages a user likes into an arraylist
                             if (response != null) {
                                 try {
-                                   // Toast.makeText(MainActivity.this,jsonObject.getString("name"),Toast.LENGTH_SHORT).show();
-                                    mTitle=(jsonObject.getString("name"));
-                                    mDate=(jsonObject.getString("start_time"));
-                                    mAddress=(jsonObject.getJSONObject("place").getString("name").toString());
-                                    drawable=  drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
+                                    // Toast.makeText(MainActivity.this,jsonObject.getString("name"),Toast.LENGTH_SHORT).show();
+                                    mTitle = (jsonObject.getString("name"));
+                                    mDate = (jsonObject.getString("start_time"));
+                                    mAddress = (jsonObject.getJSONObject("place").getString("name").toString());
+                                    drawable = drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
                                             .getString("url"));
 
 
-                                } catch (JSONException e){
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
                                     e.printStackTrace();
@@ -880,6 +893,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            downloaded=true;
+            if (mMarker != null && mMarker.isInfoWindowShown()) {
+                mMarker.showInfoWindow();
+            }
         }
     }
 
