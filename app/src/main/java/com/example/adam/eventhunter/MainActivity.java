@@ -841,8 +841,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    private class getEventDetailsAsync extends AsyncTask<String,Void,Void>
-    {
+    private class getEventDetailsAsync extends AsyncTask<String,Void,Void> {
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -863,10 +862,13 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                     mTitle=(jsonObject.getString("name"));
                                     mDate=(jsonObject.getString("start_time"));
                                     mAddress=(jsonObject.getJSONObject("place").getString("name").toString());
-                                    new getImageAsync().execute(jsonObject.getJSONObject("picture").getJSONObject("data")
+                                    drawable=  drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
                                             .getString("url"));
 
+
                                 } catch (JSONException e){
+                                    e.printStackTrace();
+                                } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -878,27 +880,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-        }
-    }
-
-    private class getImageAsync extends AsyncTask<String,Void,Void>
-    {
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-              drawable=  drawableFromUrl(strings[0]);
-               return null;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
         }
     }
 
