@@ -2,29 +2,18 @@ package com.example.adam.eventhunter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DialogTitle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -43,19 +32,12 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -65,8 +47,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,7 +54,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -137,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         accessToken = AccessToken.getCurrentAccessToken();
         pagesList = new ArrayList<String>();
         eventsList = new ArrayList<Event>();
-        executor = new ThreadPoolExecutor(10, 15, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
+        executor = new ThreadPoolExecutor(12, 20, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
         now = new Date(System.currentTimeMillis());
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
         int colorCodeDark = Color.parseColor("#FF4052B5");
@@ -249,16 +228,16 @@ public class MainActivity extends AppCompatActivity implements android.location.
         //Using the ThreadPoolExecutor, the threads run simultaneously so retrieving the events is fast
         if (pagesList.size() > 25) {
             start = 0;
-            for(int i=0;i<10;i++)
-            {
-                listLength=pagesList.size()*((i+1)*0.1);
-                new getEventsAsync().executeOnExecutor(executor, (int) listLength, start);
-                start=(int) listLength;
+            for (int i = 0; i < 10; i++) {
+                listLength = pagesList.size() * ((i + 1) * 0.1);
+                new getPageEventsAsync().executeOnExecutor(executor, (int) listLength, start);
+                start = (int) listLength;
             }
         } else {
             //Use this if the user has less than 25 liked pages
-            new getAllEventsAsync().execute();
+            new getAllPageEventsAsync().execute();
         }
+        new getUserEventsAsync().executeOnExecutor(executor);
 
     }
 
@@ -273,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
             params.putString("after", afterString[0]);
             new GraphRequest(
                     accessToken,
-                    pageId + "/events?fields=id,place,name,start_time",
+                    pageId + "/events?fields=id,place,name,start_time,end_time",
                     params,
                     HttpMethod.GET,
                     new GraphRequest.Callback() {
@@ -291,30 +270,122 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                         for (int i = 0; i < eventsArray.length(); i++) {
                                             JSONObject event = eventsArray.getJSONObject(i);
 
-                                            //Parsing a date in a string to a Date type
-                                            String strDate = event.getString("start_time");
-                                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-                                            Date date = dateFormat.parse(strDate);
+                                            if (event.has("start_time") && event.has("end_time")) {
+                                                //Parsing a date in a string to a Date type
+                                                String strDate = event.getString("start_time");
+                                                String eDate = event.getString("end_time");
+                                                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                                                Date startDate = dateFormat.parse(strDate);
+                                                Date endDate = dateFormat.parse(eDate);
 
-                                            //Only save events from today on
-                                            if (date.after(now)) {
-                                                //Only save events if it has a place object in the JSON
-                                                if (event.has("place")) {
-                                                    //Only save events if it has a location object inside the place object in the JSON
-                                                    if (event.getJSONObject("place").has("location")) {
-                                                        //Retrieving the location of an event
-                                                        JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
-                                                        double lat = locationObj.getDouble("latitude");
-                                                        double lng = locationObj.getDouble("longitude");
 
-                                                        //Create new event object
-                                                        Event eventObj = new Event(event.getString("id"), event.getString("name"), date, lat, lng);
-                                                        //Add the newly created event object to the list of events
-                                                        eventsList.add(eventObj);
-                                                        Log.d("JSONEvent", eventObj.name.toString());
+                                                //Only save events from today on
+                                                if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
+                                                    //Only save events if it has a place object in the JSON
+                                                    if (event.has("place")) {
+                                                        //Only save events if it has a location object inside the place object in the JSON
+                                                        if (event.getJSONObject("place").has("location")) {
+                                                            //Retrieving the location of an event
+                                                            JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
+                                                            double lat = locationObj.getDouble("latitude");
+                                                            double lng = locationObj.getDouble("longitude");
+
+                                                            //Create new event object
+                                                            Event eventObj = new Event(event.getString("id"), event.getString("name"), startDate, endDate, lat, lng);
+                                                            //Add the newly created event object to the list of events
+                                                            eventsList.add(eventObj);
+                                                            Log.d("JSONEvent", eventObj.name.toString());
+                                                        } else noData[0] = true;
                                                     } else noData[0] = true;
-                                                } else noData[0] = true;
-                                            } else isEventOld[0] = true;
+                                                } else isEventOld[0] = true;
+                                            } else noData[0] = true;
+                                        }
+
+
+                                        //Get the next page of the user's liked pages ids from JSONObject
+                                        if (!jsonObject.isNull("paging")) {
+                                            JSONObject paging = jsonObject.getJSONObject("paging");
+                                            JSONObject cursors = paging.getJSONObject("cursors");
+                                            if (!cursors.isNull("after"))
+                                                afterString[0] = cursors.getString("after");
+                                            else
+                                                noData[0] = true;
+                                        } else
+                                            noData[0] = true;
+                                    }
+                                } else
+                                    noData[0] = true;
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+            ).executeAndWait();
+        }
+        while (noData[0] == false && isEventOld[0] == false);
+
+    }
+
+    private void getUserEvents(final String graphPath) {
+        final String[] afterString = {""};  // will contain the next page cursor
+        final Boolean[] noData = {false};// stop when there is no after cursor
+        final Boolean[] isEventOld = {false};// stop when an event is older than today
+
+        do {
+
+            Bundle params = new Bundle();
+            params.putString("after", afterString[0]);
+            new GraphRequest(
+                    accessToken,
+                    graphPath,
+                    params,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject jsonObject = response.getJSONObject();
+
+                            //Add all the ids of the pages a user likes into an arraylist
+                            try {
+                                if (response != null) {
+                                    JSONArray eventsArray = jsonObject.getJSONArray("data");
+                                    if (eventsArray.length() == 0) {
+                                        Log.d("Pagelist", "Page list is empty");
+                                        noData[0] = true;
+                                    } else {
+                                        for (int i = 0; i < eventsArray.length(); i++) {
+                                            JSONObject event = eventsArray.getJSONObject(i);
+
+                                            if (event.has("start_time") && event.has("end_time")) {
+                                                //Parsing a date in a string to a Date type
+                                                String strDate = event.getString("start_time");
+                                                String eDate = event.getString("end_time");
+                                                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+                                                Date startDate = dateFormat.parse(strDate);
+                                                Date endDate = dateFormat.parse(eDate);
+
+
+                                                //Only save events from today on
+                                                if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
+                                                    //Only save events if it has a place object in the JSON
+                                                    if (event.has("place")) {
+                                                        //Only save events if it has a location object inside the place object in the JSON
+                                                        if (event.getJSONObject("place").has("location")) {
+                                                            //Retrieving the location of an event
+                                                            JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
+                                                            double lat = locationObj.getDouble("latitude");
+                                                            double lng = locationObj.getDouble("longitude");
+
+                                                            //Create new event object
+                                                            Event eventObj = new Event(event.getString("id"), event.getString("name"), startDate, endDate, lat, lng);
+                                                            //Add the newly created event object to the list of events
+                                                            eventsList.add(eventObj);
+                                                            Log.d("JSONEvent", eventObj.name.toString());
+                                                        } else noData[0] = true;
+                                                    } else noData[0] = true;
+                                                } else isEventOld[0] = true;
+                                            } else noData[0] = true;
                                         }
 
 
@@ -527,11 +598,18 @@ public class MainActivity extends AppCompatActivity implements android.location.
             if (connected) {
                 //Go through the list of events and add a pin to the map for each one
                 for (int i = 0; i < eventsList.size(); i++) {
-                    if (eventsList.get(i).date != null) {
-                        if (eventsList.get(i).date.before(tomorrow)) {
-                            map.addMarker(new MarkerOptions()
-                                    .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                    .title(eventsList.get(i).name));
+                    if (eventsList.get(i).startDate != null) {
+                        if (eventsList.get(i).startDate.before(tomorrow)) {
+                            Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
+                            if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                        .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                            } else {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                        .title(eventsList.get(i).name));
+                            }
                         }
                     }
                 }
@@ -557,7 +635,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    private class getEventsAsync extends AsyncTask<Integer, Void, Void> {
+    private class getPageEventsAsync extends AsyncTask<Integer, Void, Void> {
 
         @Override
         protected Void doInBackground(Integer... pageArrayLength) {
@@ -576,7 +654,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    private class getAllEventsAsync extends AsyncTask<Void, Void, Void> {
+    private class getAllPageEventsAsync extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -584,6 +662,27 @@ public class MainActivity extends AppCompatActivity implements android.location.
             for (int i = 0; i < pagesList.size(); i++) {
                 getEvents(pagesList.get(i));
             }
+            new setPinsOnMap().execute();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d("JSONEvent", eventsList.size() + "");
+        }
+    }
+
+    private class getUserEventsAsync extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+
+            getUserEvents("me/events/maybe?fields=id,place,name,start_time,end_time");
+            getUserEvents("me/events/attending?fields=id,place,name,start_time,end_time");
+            getUserEvents("me/events/not_replied?fields=id,place,name,start_time,end_time");
+
             new setPinsOnMap().execute();
             return null;
         }

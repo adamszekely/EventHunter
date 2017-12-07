@@ -8,13 +8,14 @@ import java.util.Date;
 
 public class Event {
     String id, name;
-    Date date;
+    Date startDate,endDate;
     double lat, lng;
 
 
 
-    public Event(String id, String name, Date date, double lat, double lng) {
-        this.date=date;
+    public Event(String id, String name, Date startDate,Date endDate, double lat, double lng) {
+        this.startDate=startDate;
+        this.endDate=endDate;
         this.id=id;
         this.name=name;
         this.lat=lat;
