@@ -57,12 +57,11 @@ public class CalendarActivity extends AppCompatActivity {
             }
         });
 
-
+        // Prototpe of Events Preview
         final ArrayList<EventActivity> eventArrayList = new ArrayList<EventActivity>();
         eventArrayList.add(new EventActivity("Android Event","OCT 28","12Am","Horsens Campus",null,null));
         eventArrayList.add(new EventActivity("Adam EVENTOOO","OCT 28","12Am","Horsens Campus",null,null));
         eventArrayList.add(new EventActivity("Peters dentist","OCT 28","12Am","Horsens Campus",null,null));
-
 
         EventAdapter eventAdapter = new EventAdapter(this,eventArrayList);
         final ListView listView = (ListView) findViewById(R.id.listView);
