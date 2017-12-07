@@ -3,8 +3,12 @@ package com.example.adam.eventhunter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -21,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -40,6 +45,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -49,10 +55,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -65,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private LatLng newLocation;
     private Location currentLocation;
     private Toolbar toolbar;
-    private Context mContext;
+    private static Context mContext;
     private FirebaseAuth mAuth;
     ConnectivityManager cm;
     AccessToken accessToken;
@@ -79,6 +88,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Date now;
     private BottomNavigationView bottomNavigationMenuView;
     private ProgressBar progressBar;
+    private TextView title, address, date;
+    private ImageView image;
+    private String mTitle,mAddress,mDate;
+    private Drawable drawable;
+
     // Flag for GPS status
     boolean isGPSEnabled = false;
     // Flag for network status
@@ -332,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                     if (event.has("place")) {
                                                         //Only save events if it has a location object inside the place object in the JSON
                                                         if (event.getJSONObject("place").has("location")) {
+                                                            Log.d("ALLEVENTS",event.getString("name"));
                                                             //Retrieving the location of an event
                                                             JSONObject locationObj = event.getJSONObject("place").getJSONObject("location");
                                                             double lat = locationObj.getDouble("latitude");
@@ -481,6 +496,46 @@ public class MainActivity extends AppCompatActivity implements android.location.
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                new getEventDetailsAsync().execute(marker.getTitle());
+                drawable=null;
+                View v = getLayoutInflater().inflate(R.layout.activity_preview, null);
+                title = (TextView) v.findViewById(R.id.title);
+                address = (TextView) v.findViewById(R.id.address);
+                date = (TextView) v.findViewById(R.id.date);
+                image = (ImageView) v.findViewById(R.id.image);
+                while(drawable==null){
+                }
+                title.setText(mTitle);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                try {
+                    Date myDate=dateFormat.parse(mDate);
+                    dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    String finalDate=dateFormat.format(myDate);
+                    date.setText(finalDate);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                address.setText(mAddress);
+                image.setImageDrawable(drawable);
+                return v;
+            }
+        });
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Toast.makeText(MainActivity.this,"Implementation later",Toast.LENGTH_LONG).show();
+
+            }
+        });
         if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // request the missing permissions, and then overriding
             return;
@@ -639,25 +694,23 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            LocalDate nowTime=new LocalDate();
+            LocalDate nowTime = new LocalDate();
             map.clear();
             if (connected) {
                 if (today == true) {
-                    Date tomorrow = nowTime.plusDays( 1 ).toDate();
-                    Log.d("TIMES2", tomorrow + " TOMORROW");
+                    Date tomorrow = nowTime.plusDays(1).toDate();
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null) {
                             if (eventsList.get(i).startDate.before(tomorrow)) {
-                                Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).name));
+                                            .title(eventsList.get(i).id));
                                 }
                             }
                         }
@@ -665,30 +718,29 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 } else if (weekend == true) {
                     int old = nowTime.getDayOfWeek();
                     LocalDate next = nowTime.plusDays(8 - old);
-                    Date thursday = nowTime.withDayOfWeek(DateTimeConstants.THURSDAY).toDate();
                     Date monday = next.toDate();
 
-                    Log.d("TIMES2", monday + ", " + thursday);
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null) {
-                            if (eventsList.get(i).startDate.before(monday) /*&& eventsList.get(i).startDate.after(thursday) && eventsList.get(i).endDate.after(thursday)*/) {
+                            if (eventsList.get(i).startDate.before(monday)) {
 
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).name));
+                                            .title(eventsList.get(i).id));
                                 }
                             }
                         }
                     }
                 } else if (threedays == true) {
 
-                    Date three = nowTime.plusDays( 3 ).toDate();;
+                    Date three = nowTime.plusDays(3).toDate();
+                    ;
                     Log.d("TIMES2", three + " THREE");
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
@@ -698,18 +750,18 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).name).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).name));
+                                            .title(eventsList.get(i).id));
                                 }
                             }
                         }
                     }
                 }
+                progressBar.setVisibility(View.INVISIBLE);
             }
-            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -789,7 +841,75 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-//me/events/maybe?fields=id,place,name,start_time
-//me/events/attending?fields=id,place,name,start_time
-//me/events/not_replied?fields=id,place,name,start_time
+    private class getEventDetailsAsync extends AsyncTask<String,Void,Void>
+    {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            Bundle params = new Bundle();
+            new GraphRequest(
+                    accessToken,
+                    strings[0] + "?fields=name,place,start_time,picture",
+                    params,
+                    HttpMethod.GET,
+                    new GraphRequest.Callback() {
+                        public void onCompleted(GraphResponse response) {
+                            JSONObject jsonObject = response.getJSONObject();
+
+                            //Add all the ids of the pages a user likes into an arraylist
+                            if (response != null) {
+                                try {
+                                   // Toast.makeText(MainActivity.this,jsonObject.getString("name"),Toast.LENGTH_SHORT).show();
+                                    mTitle=(jsonObject.getString("name"));
+                                    mDate=(jsonObject.getString("start_time"));
+                                    mAddress=(jsonObject.getJSONObject("place").getString("name").toString());
+                                    new getImageAsync().execute(jsonObject.getJSONObject("picture").getJSONObject("data")
+                                            .getString("url"));
+
+                                } catch (JSONException e){
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }).executeAndWait();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    private class getImageAsync extends AsyncTask<String,Void,Void>
+    {
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+              drawable=  drawableFromUrl(strings[0]);
+               return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+        }
+    }
+
+    public static Drawable drawableFromUrl(String url) throws IOException {
+        Bitmap x;
+
+        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+        connection.connect();
+        InputStream input = connection.getInputStream();
+
+        x = BitmapFactory.decodeStream(input);
+        return new BitmapDrawable(mContext.getResources(), x);
+    }
 }
