@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Date now;
     private BottomNavigationView bottomNavigationMenuView;
     private ProgressBar progressBar;
-    private TextView title, address, date;
+    private TextView title, address, date,going,interested;
     private ImageView image;
-    private String mTitle, mAddress, mDate;
+    private String mTitle, mAddress, mDate,mGoing,mInterested;
     private Drawable drawable;
     private Marker mMarker;
     int colorCodeDark;
@@ -522,6 +522,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 address = (TextView) v.findViewById(R.id.address);
                 date = (TextView) v.findViewById(R.id.date);
                 image = (ImageView) v.findViewById(R.id.image);
+                going=(TextView) v.findViewById(R.id.going);
+                interested=(TextView) v.findViewById(R.id.interested);
 
                 if (downloaded==true) {
                     title.setText(mTitle);
@@ -536,6 +538,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     }
                     address.setText(mAddress);
                     image.setImageDrawable(drawable);
+                    going.setText(mGoing);
+                    interested.setText(mInterested);
                 downloaded=false;
                 progressBarInfo.setVisibility(View.INVISIBLE);
                 }
@@ -719,11 +723,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags_green)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags)));
                                 }
                             }
                         }
@@ -732,20 +736,21 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     int old = nowTime.getDayOfWeek();
                     LocalDate next = nowTime.plusDays(8 - old);
                     Date monday = next.toDate();
+                    Date friday = nowTime.withDayOfWeek(DateTimeConstants.FRIDAY).toDate();
 
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null) {
-                            if (eventsList.get(i).startDate.before(monday)) {
-
+                            if (eventsList.get(i).startDate.before(monday) && ((eventsList.get(i).startDate.before(friday) && eventsList.get(i).endDate.after(friday)) || eventsList.get(i).startDate.after(friday))) {
+                                Log.d("WEEKEND", eventsList.get(i).startDate+",    "+eventsList.get(i).endDate);
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags_green)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags)));
                                 }
                             }
                         }
@@ -763,11 +768,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags_green)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags)));
                                 }
                             }
                         }
@@ -857,11 +862,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private class getEventDetailsAsync extends AsyncTask<String, Void, Void> {
 
         @Override
-        protected Void doInBackground(String... strings) {
+        protected Void doInBackground(final String... strings) {
             Bundle params = new Bundle();
             new GraphRequest(
                     accessToken,
-                    strings[0] + "?fields=name,place,start_time,picture",
+                    strings[0] + "?fields=name,place,start_time,picture.type(large),attending_count,maybe_count",
                     params,
                     HttpMethod.GET,
                     new GraphRequest.Callback() {
@@ -871,14 +876,13 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             //Add all the ids of the pages a user likes into an arraylist
                             if (response != null) {
                                 try {
-                                    // Toast.makeText(MainActivity.this,jsonObject.getString("name"),Toast.LENGTH_SHORT).show();
                                     mTitle = (jsonObject.getString("name"));
                                     mDate = (jsonObject.getString("start_time"));
                                     mAddress = (jsonObject.getJSONObject("place").getString("name").toString());
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
                                             .getString("url"));
-
-
+                                    mGoing="Going: "+(jsonObject.getString("attending_count"));
+                                    mInterested="Interested: "+(jsonObject.getString("maybe_count"));
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
