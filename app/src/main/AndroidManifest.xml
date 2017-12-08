@@ -50,8 +50,10 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".CalendarActivity" />
-        <activity android:name=".DetailedEvent"></activity>
+        <activity android:name=".CalendarActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".DetailedEvent"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

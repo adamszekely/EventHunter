@@ -90,11 +90,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private BottomNavigationView bottomNavigationMenuView;
     private ProgressBar progressBar;
     private TextView title, address, date,going,interested;
-    private ImageView image;
+    private ImageView image,clockIcon,locationIcon,checkIcon,starIcon;
     private String mTitle, mAddress, mDate,mGoing,mInterested;
     private Drawable drawable;
     private Marker mMarker;
-    int colorCodeDark;
+    private int colorCodeDark;
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
@@ -524,6 +524,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 image = (ImageView) v.findViewById(R.id.image);
                 going=(TextView) v.findViewById(R.id.going);
                 interested=(TextView) v.findViewById(R.id.interested);
+                clockIcon=(ImageView) v.findViewById(R.id.clock);
+                locationIcon=(ImageView) v.findViewById(R.id.location);
+                checkIcon=(ImageView) v.findViewById(R.id.check);
+                starIcon=(ImageView) v.findViewById(R.id.star);
 
                 if (downloaded==true) {
                     title.setText(mTitle);
@@ -540,7 +544,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     image.setImageDrawable(drawable);
                     going.setText(mGoing);
                     interested.setText(mInterested);
-                downloaded=false;
+                    clockIcon.setVisibility(View.VISIBLE);
+                    locationIcon.setVisibility(View.VISIBLE);
+                    checkIcon.setVisibility(View.VISIBLE);
+                    starIcon.setVisibility(View.VISIBLE);
+                    downloaded=false;
                 progressBarInfo.setVisibility(View.INVISIBLE);
                 }
                 return v;
@@ -549,7 +557,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_LONG).show();
+                Intent intent=new Intent(MainActivity.this,DetailedEvent.class);
+                intent.putExtra("pageId",marker.getTitle());
+                startActivity(intent);
 
             }
         });

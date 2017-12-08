@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,159 +7,287 @@
     android:orientation="vertical"
     tools:context="com.example.adam.eventhunter.DetailedEvent">
 
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appBar"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolBar"
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appBarEventDetail"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_gravity="center"
-            android:background="@color/colorPrimary"
-            app:popupTheme="@style/ThemeOverlay.AppCompat">
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat">
 
-            <TextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/locationBtn"
-                android:layout_centerHorizontal="true"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolBarEventDetail"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
                 android:layout_gravity="center"
-                android:text="Event information"
-                android:textColor="@color/com_facebook_button_background_color_focused"
-                android:textSize="18dp" />
+                android:background="@color/colorPrimary"
+                app:popupTheme="@style/ThemeOverlay.AppCompat">
 
-        </android.support.v7.widget.Toolbar>
-    </android.support.design.widget.AppBarLayout>
+                <TextView
+                    android:id="@+id/toolbar_title_event_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@+id/locationBtn"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center"
+                    android:text="Event information"
+                    android:textColor="@color/com_facebook_button_background_color_focused"
+                    android:textSize="18dp" />
 
-
-    <ImageView
-        android:id="@+id/detailed_image"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:src="@drawable/example"
-        app:layout_constraintEnd_toEndOf="@id/appBar"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBar" />
-
-
-    <TextView
-        android:id="@+id/detailed_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Aarhus 2017 Finale"
-        android:textSize="35sp"
-        android:textStyle="bold"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_image" />
-
-    <TextView
-        android:id="@+id/detailed_date"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        android:text="DEC 9, 14:00 -5:00"
-        android:textSize="20sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_title" />
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.AppBarLayout>
 
 
-    <TextView
-        android:id="@+id/detailed_hostedby"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:text="By : Aarhus 2017 - European...."
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_date" />
+        <ImageView
+            android:id="@+id/detailed_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="@id/appBarEventDetail"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appBarEventDetail" />
 
-    <TextView
-        android:id="@+id/detailed_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        <ProgressBar
+            android:id="@+id/progress_bar_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.301" />
 
-        android:layout_marginTop="8dp"
-        android:text="Description blablalbalblalaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_intrested_number" />
+        <TextView
+            android:id="@+id/detailed_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text=""
+            android:textColor="#F000"
+            android:textSize="28sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_image" />
+
+        <ImageView
+            android:id="@+id/clock2"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/ic_alarm"
+            app:layout_constraintRight_toLeftOf="@id/detailed_date_start"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/detailed_date_start"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_date_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:paddingStart="4dp"
+            android:text=""
+            android:textSize="17sp"
+            app:layout_constraintLeft_toRightOf="@+id/clock2"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_title" />
+
+        <ImageView
+            android:id="@+id/clockEnd"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_alarm_end"
+            android:layout_marginStart="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/detailed_date_end"
+            app:layout_constraintTop_toTopOf="@id/detailed_date_end"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_date_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:text=""
+            android:textSize="17sp"
+            app:layout_constraintLeft_toRightOf="@id/clockEnd"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_date_start" />
+
+        <ImageView
+            android:id="@+id/host"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_host"
+            android:layout_marginStart="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/detailed_hostedby"
+            app:layout_constraintTop_toTopOf="@id/detailed_hostedby"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_hostedby"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="4dp"
+            android:text=""
+            android:textSize="17sp"
+            app:layout_constraintLeft_toRightOf="@id/host"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_date_end" />
+
+        <ImageView
+            android:id="@+id/location2"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_location"
+            android:layout_marginStart="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/detailed_location"
+            app:layout_constraintTop_toTopOf="@id/detailed_location"
+            android:layout_marginTop="3dp"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_location"
+            android:layout_width="wrap_content"
+            android:layout_height="22dp"
+            android:paddingStart="4dp"
+            android:text=""
+            android:textSize="17sp"
+            app:layout_constraintLeft_toRightOf="@id/location2"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
+
+        <TextView
+            android:id="@+id/detailed_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:paddingStart="4dp"
+            android:text="Details"
+            android:textSize="17sp"
+            android:textColor="#F000"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_interested_number"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:paddingStart="4dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_details" />
+
+        <ImageView
+            android:id="@+id/going_check"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_check_circle"
+            android:layout_marginStart="20dp"
+            app:layout_constraintRight_toLeftOf="@id/detailed_going"
+            app:layout_constraintTop_toTopOf="@id/detailed_going"
+            android:layout_marginTop="1dp"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_going"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Going"
+            app:layout_constraintEnd_toStartOf="@+id/detailed_interested"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/detailed_interested"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/interested_star"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_circle_star"
+            android:layout_marginStart="20dp"
+            app:layout_constraintRight_toLeftOf="@id/detailed_interested"
+            app:layout_constraintTop_toTopOf="@id/detailed_interested"
+            android:layout_marginTop="1dp"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_interested"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="8dp"
+            android:text="Interested"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_location"
+            android:visibility="invisible"/>
+
+        <ImageView
+            android:id="@+id/detailed_invited_icon"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:src="@drawable/ic_invited"
+            android:layout_marginEnd="2dp"
+            app:layout_constraintRight_toLeftOf="@id/detailed_invited"
+            app:layout_constraintTop_toTopOf="@id/detailed_invited"
+            android:layout_marginTop="1dp"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_invited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Invited"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/detailed_interested"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_location"
+            android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/detailed_going_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text=""
+
+            app:layout_constraintEnd_toStartOf="@+id/detailed_interested_number"
+            app:layout_constraintHorizontal_bias="0.43"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_going" />
+
+        <TextView
+            android:id="@+id/detailed_interested_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="2dp"
+            android:text=""
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_interested" />
+
+        <TextView
+            android:id="@+id/detailed_invited_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text=""
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.57"
+            app:layout_constraintStart_toEndOf="@+id/detailed_interested_number"
+            app:layout_constraintTop_toBottomOf="@+id/detailed_invited" />
 
 
-    <TextView
-        android:id="@+id/detailed_going"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-
-        android:layout_marginTop="8dp"
-        android:text="Going"
-        app:layout_constraintEnd_toStartOf="@+id/detailed_intrested"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
-
-    <TextView
-        android:id="@+id/detailed_intrested"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_marginTop="8dp"
-        android:text="Interested"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
-
-    <TextView
-        android:id="@+id/detailed_invited"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_marginTop="8dp"
-        android:text="Invited"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/detailed_intrested"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
-
-    <TextView
-        android:id="@+id/detailed_going_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:text="1000"
-        android:textColor="#4CAF50"
-        app:layout_constraintEnd_toStartOf="@+id/detailed_intrested_number"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_going" />
-
-    <TextView
-        android:id="@+id/detailed_intrested_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="200"
-        android:textColor="#CDDC39"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_intrested" />
-
-    <TextView
-        android:id="@+id/detailed_invited_number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="10"
-        android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/detailed_intrested_number"
-        app:layout_constraintTop_toBottomOf="@+id/detailed_invited" />
-
-
-</android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
+</ScrollView>

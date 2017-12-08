@@ -45,9 +45,10 @@
         android:id="@+id/clock"
         android:layout_width="14dp"
         android:layout_height="14dp"
-        android:src="@drawable/ic_clock"
+        android:src="@drawable/ic_alarm"
         android:layout_below="@id/title"
-        android:layout_marginTop="3dp"/>
+        android:layout_marginTop="3dp"
+        android:visibility="invisible"/>
     <TextView
         android:id="@+id/date"
         android:layout_width="wrap_content"
@@ -64,7 +65,8 @@
         android:layout_height="14dp"
         android:src="@drawable/ic_location"
         android:layout_below="@id/date"
-        android:layout_marginTop="3dp"/>
+        android:layout_marginTop="3dp"
+        android:visibility="invisible"/>
     <TextView
         android:id="@+id/address"
         android:layout_width="wrap_content"
@@ -78,9 +80,10 @@
         android:id="@+id/check"
         android:layout_width="14dp"
         android:layout_height="14dp"
-        android:src="@drawable/ic_check_mark"
+        android:src="@drawable/ic_check_circle"
         android:layout_below="@id/address"
-        android:layout_marginTop="3dp"/>
+        android:layout_marginTop="3dp"
+        android:visibility="invisible"/>
     <TextView
         android:id="@+id/going"
         android:layout_width="wrap_content"
@@ -94,11 +97,12 @@
         android:id="@+id/star"
         android:layout_width="14dp"
         android:layout_height="14dp"
-        android:src="@drawable/ic_star"
+        android:src="@drawable/ic_circle_star"
         android:layout_below="@id/address"
         android:layout_marginStart="12dp"
         android:layout_toEndOf="@+id/going"
-        android:layout_marginTop="3dp"/>
+        android:layout_marginTop="3dp"
+        android:visibility="invisible"/>
     <TextView
         android:id="@+id/interested"
         android:layout_width="wrap_content"
