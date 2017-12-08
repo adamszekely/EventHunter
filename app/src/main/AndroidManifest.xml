@@ -51,6 +51,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".CalendarActivity" />
+        <activity android:name=".DetailedEvent"></activity>
     </application>
 
 </manifest>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.adam.eventhunter.DetailedEvent">
+
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="center"
+            android:background="@color/colorPrimary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat">
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/locationBtn"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:text="Event information"
+                android:textColor="@color/com_facebook_button_background_color_focused"
+                android:textSize="18dp" />
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+
+    <ImageView
+        android:id="@+id/detailed_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:src="@drawable/example"
+        app:layout_constraintEnd_toEndOf="@id/appBar"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBar" />
+
+
+    <TextView
+        android:id="@+id/detailed_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aarhus 2017 Finale"
+        android:textSize="35sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_image" />
+
+    <TextView
+        android:id="@+id/detailed_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:text="DEC 9, 14:00 -5:00"
+        android:textSize="20sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_title" />
+
+
+    <TextView
+        android:id="@+id/detailed_hostedby"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:text="By : Aarhus 2017 - European...."
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_date" />
+
+    <TextView
+        android:id="@+id/detailed_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="8dp"
+        android:text="Description blablalbalblalaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_intrested_number" />
+
+
+    <TextView
+        android:id="@+id/detailed_going"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+
+        android:layout_marginTop="8dp"
+        android:text="Going"
+        app:layout_constraintEnd_toStartOf="@+id/detailed_intrested"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
+
+    <TextView
+        android:id="@+id/detailed_intrested"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="8dp"
+        android:text="Interested"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
+
+    <TextView
+        android:id="@+id/detailed_invited"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="8dp"
+        android:text="Invited"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/detailed_intrested"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_hostedby" />
+
+    <TextView
+        android:id="@+id/detailed_going_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="1000"
+        android:textColor="#4CAF50"
+        app:layout_constraintEnd_toStartOf="@+id/detailed_intrested_number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_going" />
+
+    <TextView
+        android:id="@+id/detailed_intrested_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="200"
+        android:textColor="#CDDC39"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_intrested" />
+
+    <TextView
+        android:id="@+id/detailed_invited_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="10"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/detailed_intrested_number"
+        app:layout_constraintTop_toBottomOf="@+id/detailed_invited" />
+
+
+</android.support.constraint.ConstraintLayout>
