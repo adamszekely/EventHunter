@@ -8,10 +8,7 @@ import java.util.Date;
 
 public class Event {
     String id, name;
-    Date startDate,endDate;
-    double lat, lng;
-
-
+    Date startDate;
 
     public Event(String id, String name, Date startDate,Date endDate, double lat, double lng) {
         this.startDate=startDate;
@@ -22,5 +19,31 @@ public class Event {
         this.lng=lng;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    Date endDate;
+    double lat, lng;
 
 }

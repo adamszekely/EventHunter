@@ -108,7 +108,9 @@ public class DetailedEvent extends AppCompatActivity {
                                 try {
                                     mTitle = (jsonObject.getString("name"));
                                     mStart_date = (jsonObject.getString("start_time"));
-                                    mEnd_date = (jsonObject.getString("end_time"));
+                                    if(jsonObject.has("end_time")) {
+                                        mEnd_date = (jsonObject.getString("end_time"));
+                                    }
                                     mLocation = (jsonObject.getJSONObject("place").getString("name").toString());
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("cover")
                                             .getString("source"));
@@ -139,10 +141,11 @@ public class DetailedEvent extends AppCompatActivity {
                 start_date.setText(finalDate);
 
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                if(mEnd_date!=null){
                 Date myDate2=dateFormat.parse(mEnd_date);
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 String finalDate2=dateFormat.format(myDate2);
-                end_date.setText(finalDate2);
+                end_date.setText(finalDate2);}
             } catch (ParseException e) {
                 e.printStackTrace();
             }

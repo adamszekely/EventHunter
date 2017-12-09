@@ -46,6 +46,27 @@ public class EventAdapter extends ArrayAdapter<EventActivity> {
         TextView address = (TextView) listItemView.findViewById(R.id.address);
         address.setText(currentEvent.getAddress());
 
+        TextView going=(TextView) listItemView.findViewById(R.id.going);
+        going.setText(currentEvent.getGoing());
+
+        TextView interested=(TextView) listItemView.findViewById(R.id.interested);
+        interested.setText(currentEvent.getInterested());
+
+        ImageView clock=(ImageView) listItemView.findViewById(R.id.clock);
+        clock.setImageResource(R.drawable.ic_alarm);
+        clock.setVisibility(View.VISIBLE);
+
+        ImageView location=(ImageView) listItemView.findViewById(R.id.location);
+        location.setImageResource(R.drawable.ic_location);
+        location.setVisibility(View.VISIBLE);
+
+        ImageView goingImg=(ImageView) listItemView.findViewById(R.id.check);
+        goingImg.setImageResource(R.drawable.ic_check_circle);
+        goingImg.setVisibility(View.VISIBLE);
+
+        ImageView interestedImg=(ImageView) listItemView.findViewById(R.id.star);
+        interestedImg.setImageResource(R.drawable.ic_circle_star);
+        interestedImg.setVisibility(View.VISIBLE);
 
         return listItemView;
     }
