@@ -9,7 +9,7 @@ import android.widget.Button;
 
 public class EventActivity {
 
-
+    private String id;
     private String title;
     private String date;
     private String address;
@@ -17,13 +17,22 @@ public class EventActivity {
     private String going;
     private Drawable image;
 
-    public EventActivity(String title, String date, String address, Drawable image, String going, String interested) {
+    public EventActivity(String id, String title, String date, String address, Drawable image, String going, String interested) {
+        this.id = id;
         this.image = image;
         this.title = title;
         this.date = date;
         this.address = address;
         this.interested = interested;
         this.going = going;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {

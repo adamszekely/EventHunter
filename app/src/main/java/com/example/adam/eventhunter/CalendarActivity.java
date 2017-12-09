@@ -42,7 +42,9 @@ public class CalendarActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.nav_list:
-                        Toast.makeText(CalendarActivity.this, "Implementation later", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(CalendarActivity.this, ListActivity.class);
+                        startActivity(intent);
+                        finish();
                         break;
                     case R.id.nav_map:
                         Intent intent2 = new Intent(CalendarActivity.this, MainActivity.class);

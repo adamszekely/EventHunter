@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -122,6 +123,15 @@ public class ListActivity extends AppCompatActivity {
                 }
             }
         });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent=new Intent(ListActivity.this,DetailedEvent.class);
+                intent.putExtra("pageId",eventArrayList.get(position).getId());
+                startActivity(intent);
+            }
+        });
     }
 
     private class getEventDetailsAsync extends AsyncTask<String, Void, Void> {
@@ -133,7 +143,7 @@ public class ListActivity extends AppCompatActivity {
             Bundle params = new Bundle();
             new GraphRequest(
                     accessToken,
-                    strings[0] + "?fields=name,place,start_time,picture.type(large),attending_count,maybe_count",
+                    strings[0] + "?fields=name,place,start_time,picture.type(large),attending_count,maybe_count,id",
                     params,
                     HttpMethod.GET,
                     new GraphRequest.Callback() {
@@ -151,7 +161,7 @@ public class ListActivity extends AppCompatActivity {
                                         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                                         String finalDate = dateFormat.format(myDate);
 
-                                        eventArrayList.add(new EventActivity(jsonObject.getString("name"),
+                                        eventArrayList.add(new EventActivity(jsonObject.getString("id"),jsonObject.getString("name"),
                                                 finalDate, jsonObject.getJSONObject("place").getString("name"),
                                                 drawable, "Going: " + (jsonObject.getString("attending_count")),
                                                 "Interested: " + (jsonObject.getString("maybe_count"))));

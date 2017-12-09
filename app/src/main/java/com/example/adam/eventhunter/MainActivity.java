@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
         colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
-
+        progressBar.setVisibility(View.VISIBLE);
         //End of initializations
 
         toolbar.setTitle("");
@@ -315,6 +315,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
             new getAllPageEventsAsync().execute();
         }
         new getUserEventsAsync().executeOnExecutor(executor);
+        new checkForBackgroundTasks().execute();
         executor.shutdown();
     }
 
@@ -858,9 +859,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         }
                     }
                 }
-                if(executor.getActiveCount()==2) {
-                    progressBar.setVisibility(View.INVISIBLE);
-                }
+                progressBar.setVisibility(View.INVISIBLE);
+
             }
         }
     }
@@ -877,6 +877,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            progressBar.setVisibility(View.VISIBLE);
             Log.d("JSON", pagesList.size() + "");
             Log.d("JSONEvent", eventsList.size() + "");
         }
@@ -896,7 +897,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            new setPinsOnMap().execute();
+            //new setPinsOnMap().execute();
         }
     }
 
@@ -914,7 +915,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            new setPinsOnMap().execute();
+           // new setPinsOnMap().execute();
             Log.d("JSONEvent", eventsList.size() + "");
         }
     }
@@ -936,7 +937,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            new setPinsOnMap().execute();
+            //new setPinsOnMap().execute();
             Log.d("JSONEvent", eventsList.size() + "");
         }
     }
@@ -982,6 +983,29 @@ public class MainActivity extends AppCompatActivity implements android.location.
             downloaded = true;
             if (mMarker != null && mMarker.isInfoWindowShown()) {
                 mMarker.showInfoWindow();
+            }
+        }
+    }
+
+    private class checkForBackgroundTasks extends AsyncTask<Void,Void,Void> {
+        boolean running=true;
+        @Override
+        protected Void doInBackground(Void... voids) {
+            while(executor.getActiveCount()!=0){
+                running=true;
+            }
+            if(executor.getActiveCount()==0)
+            {
+                running=false;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(!running) {
+                new setPinsOnMap().execute();
             }
         }
     }
