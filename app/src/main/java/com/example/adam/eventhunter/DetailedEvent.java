@@ -145,7 +145,8 @@ public class DetailedEvent extends AppCompatActivity {
                 Date myDate2=dateFormat.parse(mEnd_date);
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 String finalDate2=dateFormat.format(myDate2);
-                end_date.setText(finalDate2);}
+                end_date.setText(finalDate2);
+            }
             } catch (ParseException e) {
                 e.printStackTrace();
             }

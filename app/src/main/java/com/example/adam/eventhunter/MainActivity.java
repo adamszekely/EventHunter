@@ -177,10 +177,14 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     case R.id.nav_map:
                         break;
                     case R.id.nav_calendar:
-                        progressBar.setVisibility(View.VISIBLE);
-                        Intent intent3 = new Intent(MainActivity.this, CalendarActivity.class);
-                        startActivity(intent3);
-                        finish();
+                        if (executor.getActiveCount() == 0) {
+                            progressBar.setVisibility(View.VISIBLE);
+                            Intent intent3 = new Intent(MainActivity.this, CalendarActivity.class);
+                            startActivity(intent3);
+                            finish();
+                        }else {
+                            Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
+                        }
                         break;
                 }
                 return true;
@@ -482,9 +486,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                 String strDate = event.getString("start_time");
                                                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
                                                 Date startDate = dateFormat.parse(strDate);
-
+                                                DateTime endTime = new DateTime(startDate);
+                                                Date endDate = endTime.plusDays(1).toDate();
+                                                Log.d("ENDDATE", endDate+"");
                                                 //Only save events from today on
-                                                if (startDate.after(now)) {
+                                                if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
                                                     Log.d("JSONEvent", event.getString("name"));
                                                     //Only save events if it has a place object in the JSON
                                                     if (event.has("place")) {
@@ -496,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                             double lng = locationObj.getDouble("longitude");
 
                                                             //Create new event object
-                                                            Event eventObj = new Event(event.getString("id"), event.getString("name"), startDate, null, lat, lng);
+                                                            Event eventObj = new Event(event.getString("id"), event.getString("name"), startDate, endDate, lat, lng);
                                                             //Add the newly created event object to the list of events
                                                             eventsList.add(eventObj);
 
@@ -507,7 +513,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                                 double lng = address.longitude;
 
                                                                 //Create new event object
-                                                                Event eventObj = new Event(event.getString("id"), event.getString("name"), startDate, null, lat, lng);
+                                                                Event eventObj = new Event(event.getString("id"), event.getString("name"), startDate, endDate, lat, lng);
                                                                 //Add the newly created event object to the list of events
                                                                 eventsList.add(eventObj);
                                                             }
@@ -915,7 +921,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-           // new setPinsOnMap().execute();
+            // new setPinsOnMap().execute();
             Log.d("JSONEvent", eventsList.size() + "");
         }
     }
@@ -987,16 +993,16 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    private class checkForBackgroundTasks extends AsyncTask<Void,Void,Void> {
-        boolean running=true;
+    private class checkForBackgroundTasks extends AsyncTask<Void, Void, Void> {
+        boolean running = true;
+
         @Override
         protected Void doInBackground(Void... voids) {
-            while(executor.getActiveCount()!=0){
-                running=true;
+            while (executor.getActiveCount() != 0) {
+                running = true;
             }
-            if(executor.getActiveCount()==0)
-            {
-                running=false;
+            if (executor.getActiveCount() == 0) {
+                running = false;
             }
             return null;
         }
@@ -1004,7 +1010,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if(!running) {
+            if (!running) {
                 new setPinsOnMap().execute();
             }
         }
