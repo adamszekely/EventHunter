@@ -272,32 +272,31 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             int year = c.get(Calendar.YEAR);
                             int month = c.get(Calendar.MONTH);
                             int day = c.get(Calendar.DAY_OF_MONTH);
-                            Toast.makeText(MainActivity.this, "Choose a date you want to search from", Toast.LENGTH_SHORT).show();
-                            DatePickerDialog datePickerDialogTo = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            DatePickerDialogFragment datePickerDialogTo = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+
                                 @Override
                                 public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-
-                                    Log.d("INSIDE", pickedStartDate + "");
                                     if ((new LocalDate(year, month + 1, day).toDate()).before(pickedStartDate)) {
-                                        Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_LONG).show();
                                     } else {
                                         pickedEndDate = new LocalDate(year, month + 1, day).toDate();
                                         new setPinsOnMap().execute();
                                     }
                                 }
                             }, year, month, day);
+                            datePickerDialogTo.setPermanentTitle("Search until");
                             datePickerDialogTo.show();
 
-                            DatePickerDialog datePickerDialogFrom = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            DatePickerDialogFragment datePickerDialogFrom = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
 
                                 @Override
                                 public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                    Toast.makeText(MainActivity.this, "Choose a date you want to search until", Toast.LENGTH_SHORT).show();
                                     pickedStartDate = new LocalDate(year, month + 1, day).toDate();
                                     Log.d("INSIDE", "Start");
 
                                 }
                             }, year, month, day);
+                            datePickerDialogFrom.setPermanentTitle("Search from");
                             datePickerDialogFrom.show();
                             }else {
                                 Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();

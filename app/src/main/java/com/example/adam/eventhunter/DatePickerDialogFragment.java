@@ -3,7 +3,10 @@ package com.example.adam.eventhunter;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.widget.DatePicker;
 
@@ -16,26 +19,21 @@ import java.util.Calendar;
  * Created by Mio on 11-Dec-17.
  */
 
-public class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+public class DatePickerDialogFragment extends DatePickerDialog {
 
+    private CharSequence title;
 
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
-
-        return new DatePickerDialog(getActivity(), this, year, month, day);
+    public DatePickerDialogFragment(@NonNull Context context, @Nullable OnDateSetListener listener, int year, int month, int dayOfMonth) {
+        super(context, listener, year, month, dayOfMonth);
+    }
+    public void setPermanentTitle(CharSequence title) {
+        this.title = title;
+        setTitle(title);
     }
 
     @Override
-    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-        Calendar c = Calendar.getInstance();
-        c.set(year,month,day);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedDate = sdf.format(c.getTime());
-
-
+    public void onDateChanged(DatePicker view, int year, int month, int day) {
+        super.onDateChanged(view, year, month, day);
+        setTitle(title);
     }
 }
