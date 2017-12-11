@@ -46,14 +46,16 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/appBar">
         <TextView
-            android:layout_width="130dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dates"
+            android:layout_weight="1"
+            android:text="@string/events_period"
             android:gravity="center"/>
 
         <TextView
-            android:layout_width="130dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Map type"
             android:gravity="center"/>
     </LinearLayout>
@@ -64,13 +66,15 @@
         app:layout_constraintTop_toBottomOf="@id/linearLayoutTitles">
         <Spinner
             android:id="@+id/dynamic_spinner_dates"
-            android:layout_width="130dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbarSize="20dp"/>
 
         <Spinner
             android:id="@+id/dynamic_spinner_map_type"
-            android:layout_width="130dp"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:scrollbarSize="20dp"
             />
@@ -135,4 +139,5 @@
 
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/map" />
+
 </android.support.constraint.ConstraintLayout>

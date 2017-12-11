@@ -1,5 +1,6 @@
 package com.example.adam.eventhunter;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,6 +19,7 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -68,6 +71,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -88,11 +92,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private String userId;
     private List<String> pagesList;
     private static List<Event> eventsList;
-    private boolean today, weekend, threedays, downloaded;
+    private boolean today, weekend, threedays, chooseDates, downloaded;
     private int start;
     private double listLength;
     private ThreadPoolExecutor executor;
-    private Date now;
+    private Date now, pickedStartDate, pickedEndDate;
     private BottomNavigationView bottomNavigationMenuView;
     private ProgressBar progressBar;
     private TextView title, address, date, going, interested;
@@ -101,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Drawable drawable;
     private Marker mMarker;
     private int colorCodeDark;
+
     // Flag for GPS status
     boolean isGPSEnabled = false;
     // Flag for network status
@@ -182,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             Intent intent3 = new Intent(MainActivity.this, CalendarActivity.class);
                             startActivity(intent3);
                             finish();
-                        }else {
+                        } else {
                             Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
                         }
                         break;
@@ -233,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         today = true;
                         weekend = false;
                         threedays = false;
+                        chooseDates = false;
                         progressBar.setVisibility(View.VISIBLE);
                         new setPinsOnMap().execute();
                         break;
@@ -240,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         today = false;
                         weekend = true;
                         threedays = false;
+                        chooseDates = false;
                         progressBar.setVisibility(View.VISIBLE);
                         new setPinsOnMap().execute();
                         break;
@@ -247,8 +254,48 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         today = false;
                         weekend = false;
                         threedays = true;
+                        chooseDates = false;
                         progressBar.setVisibility(View.VISIBLE);
                         new setPinsOnMap().execute();
+                        break;
+                    case "Choose dates":
+                        today = false;
+                        weekend = false;
+                        threedays = false;
+                        chooseDates = true;
+
+                        final Calendar c = Calendar.getInstance();
+                        int year = c.get(Calendar.YEAR);
+                        int month = c.get(Calendar.MONTH);
+                        int day = c.get(Calendar.DAY_OF_MONTH);
+
+                        DatePickerDialog datePickerDialogFrom = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                pickedStartDate = new LocalDate(year, month, day).toDate();
+
+                            }
+                        }, year, month, day);
+
+                        datePickerDialogFrom.show();
+
+                        //if(!datePickerDialogFrom.)
+                        //{
+                        DatePickerDialog datePickerDialogTo = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+
+
+                                if ((new LocalDate(year, month, day).toDate()).before(pickedStartDate)) {
+                                    Toast.makeText(MainActivity.this, "End date cannot be before the start date", Toast.LENGTH_SHORT).show();
+                                }
+                                pickedEndDate = new LocalDate(year, month, day).toDate();
+                            }
+                        }, year, month, day);
+                        datePickerDialogTo.show();
+                        //}
+                        //progressBar.setVisibility(View.VISIBLE);
+                        //new setPinsOnMap().execute();
                         break;
                 }
             }
@@ -488,7 +535,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                 Date startDate = dateFormat.parse(strDate);
                                                 DateTime endTime = new DateTime(startDate);
                                                 Date endDate = endTime.plusDays(1).toDate();
-                                                Log.d("ENDDATE", endDate+"");
+                                                Log.d("ENDDATE", endDate + "");
                                                 //Only save events from today on
                                                 if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
                                                     Log.d("JSONEvent", event.getString("name"));
