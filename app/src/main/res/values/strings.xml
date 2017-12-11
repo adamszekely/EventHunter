@@ -91,7 +91,7 @@
     </string-array>
 
 
-    <string name="events_period">Filter</string>
+    <string name="events_period">Time filter</string>
     <string-array name="dates_array">
         <item>Today</item>
         <item>Weekend</item>

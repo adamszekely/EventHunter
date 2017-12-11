@@ -226,6 +226,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
         //End of map type drop-down list
 
         dynamicSpinnerDates.setAdapter(adapterDates);
+
+
         dynamicSpinnerDates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
@@ -268,34 +270,33 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         int year = c.get(Calendar.YEAR);
                         int month = c.get(Calendar.MONTH);
                         int day = c.get(Calendar.DAY_OF_MONTH);
-
-                        DatePickerDialog datePickerDialogFrom = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                pickedStartDate = new LocalDate(year, month, day).toDate();
-
-                            }
-                        }, year, month, day);
-
-                        datePickerDialogFrom.show();
-
-                        //if(!datePickerDialogFrom.)
-                        //{
+                        Toast.makeText(MainActivity.this, "Choose a date you want to search from", Toast.LENGTH_SHORT).show();
                         DatePickerDialog datePickerDialogTo = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
 
-
-                                if ((new LocalDate(year, month, day).toDate()).before(pickedStartDate)) {
-                                    Toast.makeText(MainActivity.this, "End date cannot be before the start date", Toast.LENGTH_SHORT).show();
+                                Log.d("INSIDE", pickedStartDate+"");
+                                if ((new LocalDate(year, month+1, day).toDate()).before(pickedStartDate)) {
+                                    Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    pickedEndDate = new LocalDate(year, month+1, day).toDate();
+                                    new setPinsOnMap().execute();
                                 }
-                                pickedEndDate = new LocalDate(year, month, day).toDate();
                             }
                         }, year, month, day);
                         datePickerDialogTo.show();
-                        //}
-                        //progressBar.setVisibility(View.VISIBLE);
-                        //new setPinsOnMap().execute();
+
+                        DatePickerDialog datePickerDialogFrom = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                Toast.makeText(MainActivity.this, "Choose a date you want to search until", Toast.LENGTH_SHORT).show();
+                                pickedStartDate = new LocalDate(year, month+1, day).toDate();
+                                Log.d("INSIDE", "Start");
+
+                            }
+                        }, year, month, day);
+                        datePickerDialogFrom.show();
                         break;
                 }
             }
@@ -892,12 +893,29 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 } else if (threedays == true) {
 
                     Date three = nowTime.plusDays(3).toDate();
-                    ;
                     Log.d("TIMES2", three + " THREE");
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null) {
                             if (eventsList.get(i).startDate.before(three)) {
+                                Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
+                                if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags_green)));
+                                } else {
+                                    map.addMarker(new MarkerOptions()
+                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_and_flags)));
+                                }
+                            }
+                        }
+                    }
+                }else if (chooseDates == true) {
+                    //Go through the list of events and add a pin to the map for each one
+                    for (int i = 0; i < eventsList.size(); i++) {
+                        if (eventsList.get(i).startDate != null && eventsList.get(i).endDate != null) {
+                            if (eventsList.get(i).startDate.before(pickedEndDate) && ((eventsList.get(i).startDate.before(pickedStartDate) && eventsList.get(i).endDate.after(pickedStartDate)) || eventsList.get(i).startDate.after(pickedStartDate))) {
                                 Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
