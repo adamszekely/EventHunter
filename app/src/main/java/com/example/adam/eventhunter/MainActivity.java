@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Drawable drawable;
     private Marker mMarker;
     private int colorCodeDark;
+    private SpinnerTrigger spinnerTrigger;
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
@@ -144,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         ArrayAdapter<String> adapterMap = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
 
-        Spinner dynamicSpinnerDates = (Spinner) findViewById(R.id.dynamic_spinner_dates);
+        SpinnerTrigger dynamicSpinnerDates = (SpinnerTrigger) findViewById(R.id.dynamic_spinner_dates);
         ArrayAdapter<String> adapterDates = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.dates_array));
 
@@ -157,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
         progressBar.setVisibility(View.VISIBLE);
+        spinnerTrigger = new SpinnerTrigger(mContext);
         //End of initializations
 
         toolbar.setTitle("");
@@ -227,78 +229,81 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
         dynamicSpinnerDates.setAdapter(adapterDates);
 
-
         dynamicSpinnerDates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
+
                 ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
                 //((TextView) parent.getChildAt(0)).setTextSize(20);
-                switch ((String) parent.getItemAtPosition(position)) {
-                    case "Today":
-                        today = true;
-                        weekend = false;
-                        threedays = false;
-                        chooseDates = false;
-                        progressBar.setVisibility(View.VISIBLE);
-                        new setPinsOnMap().execute();
-                        break;
-                    case "Weekend":
-                        today = false;
-                        weekend = true;
-                        threedays = false;
-                        chooseDates = false;
-                        progressBar.setVisibility(View.VISIBLE);
-                        new setPinsOnMap().execute();
-                        break;
-                    case "3 days":
-                        today = false;
-                        weekend = false;
-                        threedays = true;
-                        chooseDates = false;
-                        progressBar.setVisibility(View.VISIBLE);
-                        new setPinsOnMap().execute();
-                        break;
-                    case "Choose dates":
-                        today = false;
-                        weekend = false;
-                        threedays = false;
-                        chooseDates = true;
+                    switch ((String) parent.getItemAtPosition(position)) {
+                        case "Today":
+                            today = true;
+                            weekend = false;
+                            threedays = false;
+                            chooseDates = false;
+                            progressBar.setVisibility(View.VISIBLE);
+                            new setPinsOnMap().execute();
+                            break;
+                        case "Weekend":
+                            today = false;
+                            weekend = true;
+                            threedays = false;
+                            chooseDates = false;
+                            progressBar.setVisibility(View.VISIBLE);
+                            new setPinsOnMap().execute();
+                            break;
+                        case "3 days":
+                            today = false;
+                            weekend = false;
+                            threedays = true;
+                            chooseDates = false;
+                            progressBar.setVisibility(View.VISIBLE);
+                            new setPinsOnMap().execute();
+                            break;
+                        case "Choose dates":
+                            if (executor.getActiveCount() == 0) {
+                            today = false;
+                            weekend = false;
+                            threedays = false;
+                            chooseDates = true;
 
-                        final Calendar c = Calendar.getInstance();
-                        int year = c.get(Calendar.YEAR);
-                        int month = c.get(Calendar.MONTH);
-                        int day = c.get(Calendar.DAY_OF_MONTH);
-                        Toast.makeText(MainActivity.this, "Choose a date you want to search from", Toast.LENGTH_SHORT).show();
-                        DatePickerDialog datePickerDialogTo = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                            final Calendar c = Calendar.getInstance();
+                            int year = c.get(Calendar.YEAR);
+                            int month = c.get(Calendar.MONTH);
+                            int day = c.get(Calendar.DAY_OF_MONTH);
+                            Toast.makeText(MainActivity.this, "Choose a date you want to search from", Toast.LENGTH_SHORT).show();
+                            DatePickerDialog datePickerDialogTo = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                                @Override
+                                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
 
-                                Log.d("INSIDE", pickedStartDate+"");
-                                if ((new LocalDate(year, month+1, day).toDate()).before(pickedStartDate)) {
-                                    Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    pickedEndDate = new LocalDate(year, month+1, day).toDate();
-                                    new setPinsOnMap().execute();
+                                    Log.d("INSIDE", pickedStartDate + "");
+                                    if ((new LocalDate(year, month + 1, day).toDate()).before(pickedStartDate)) {
+                                        Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        pickedEndDate = new LocalDate(year, month + 1, day).toDate();
+                                        new setPinsOnMap().execute();
+                                    }
                                 }
+                            }, year, month, day);
+                            datePickerDialogTo.show();
+
+                            DatePickerDialog datePickerDialogFrom = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+
+                                @Override
+                                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                    Toast.makeText(MainActivity.this, "Choose a date you want to search until", Toast.LENGTH_SHORT).show();
+                                    pickedStartDate = new LocalDate(year, month + 1, day).toDate();
+                                    Log.d("INSIDE", "Start");
+
+                                }
+                            }, year, month, day);
+                            datePickerDialogFrom.show();
+                            }else {
+                                Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
                             }
-                        }, year, month, day);
-                        datePickerDialogTo.show();
-
-                        DatePickerDialog datePickerDialogFrom = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
-
-                            @Override
-                            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                Toast.makeText(MainActivity.this, "Choose a date you want to search until", Toast.LENGTH_SHORT).show();
-                                pickedStartDate = new LocalDate(year, month+1, day).toDate();
-                                Log.d("INSIDE", "Start");
-
-                            }
-                        }, year, month, day);
-                        datePickerDialogFrom.show();
-                        break;
-                }
+                            break;
+                    }
             }
 
             @Override
@@ -306,6 +311,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
             }
         });
+
+
     }
 
     private void getPages() {
@@ -911,7 +918,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             }
                         }
                     }
-                }else if (chooseDates == true) {
+                } else if (chooseDates == true) {
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null && eventsList.get(i).endDate != null) {

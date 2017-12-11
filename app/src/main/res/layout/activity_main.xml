@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/linearLayoutTitles">
-        <Spinner
+        <com.example.adam.eventhunter.SpinnerTrigger
             android:id="@+id/dynamic_spinner_dates"
             android:layout_weight="1"
             android:layout_width="match_parent"

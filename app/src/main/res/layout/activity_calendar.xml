@@ -44,7 +44,7 @@
         app:layout_constraintBottom_toTopOf="@+id/listView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBar"
-        app:mcv_selectionColor="#00F"
+        app:mcv_selectionColor="@color/colorPrimary"
         app:mcv_showOtherDates="none" />
 
 
