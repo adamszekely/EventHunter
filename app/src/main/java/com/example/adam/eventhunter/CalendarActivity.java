@@ -179,7 +179,7 @@ public class CalendarActivity extends AppCompatActivity {
                             JSONObject jsonObject = response.getJSONObject();
                             Log.d("JSONRESPONSE", response.getRawResponse() + "");
                             //Add all the ids of the pages a user likes into an arraylist
-                            if (!response.equals("null")) {
+                            if (!response.equals("null") && jsonObject!=null) {
                                 try {
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
                                             .getString("url"));

@@ -34,11 +34,11 @@ import java.util.Date;
 
 public class DetailedEvent extends AppCompatActivity {
 
-    TextView title,start_date,end_date,location,going,interested,invited,description,host,detail,textInterested,textGoing,textInvited;
-    ImageView mainImage,clockStartIcon,clockEndIcon,locationIcon,checkIcon,starIcon,invitedIcon,hostIcon;
+    TextView title, start_date, end_date, location, going, interested, invited, description, host, detail, textInterested, textGoing, textInvited;
+    ImageView mainImage, clockStartIcon, clockEndIcon, locationIcon, checkIcon, starIcon, invitedIcon, hostIcon;
     Drawable drawable;
     ProgressBar progressBar;
-    String pageId,mTitle,mStart_date,mEnd_date,mLocation,mGoing,mInterested,mInvited,mDescription,mHost;
+    String pageId, mTitle, mStart_date, mEnd_date, mLocation, mGoing, mInterested, mInvited, mDescription, mHost;
     AccessToken accessToken;
     private static Context mContext;
 
@@ -49,40 +49,40 @@ public class DetailedEvent extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_detail);
         int colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
-        title=(TextView) findViewById(R.id.detailed_title);
-        start_date=(TextView) findViewById(R.id.detailed_date_start);
-        end_date=(TextView) findViewById(R.id.detailed_date_end);
-        location=(TextView) findViewById(R.id.detailed_location);
-        host=(TextView) findViewById(R.id.detailed_hostedby);
-        going=(TextView) findViewById(R.id.detailed_going_number);
-        interested=(TextView) findViewById(R.id.detailed_interested_number);
-        invited=(TextView) findViewById(R.id.detailed_invited_number);
-        description=(TextView) findViewById(R.id.detailed_description);
-        mainImage=(ImageView) findViewById(R.id.detailed_image);
-        detail=(TextView) findViewById(R.id.detailed_details);
-        clockStartIcon=(ImageView) findViewById(R.id.clock2);
-        clockEndIcon=(ImageView) findViewById(R.id.clockEnd);
-        locationIcon=(ImageView) findViewById(R.id.location2);
-        checkIcon=(ImageView) findViewById(R.id.going_check);
-        starIcon=(ImageView) findViewById(R.id.interested_star);
-        invitedIcon=(ImageView) findViewById(R.id.detailed_invited_icon);
-        hostIcon=(ImageView) findViewById(R.id.host);
-        textGoing=(TextView) findViewById(R.id.detailed_going);
-        textInterested=(TextView) findViewById(R.id.detailed_interested);
-        textInvited=(TextView) findViewById(R.id.detailed_invited);
+        title = (TextView) findViewById(R.id.detailed_title);
+        start_date = (TextView) findViewById(R.id.detailed_date_start);
+        end_date = (TextView) findViewById(R.id.detailed_date_end);
+        location = (TextView) findViewById(R.id.detailed_location);
+        host = (TextView) findViewById(R.id.detailed_hostedby);
+        going = (TextView) findViewById(R.id.detailed_going_number);
+        interested = (TextView) findViewById(R.id.detailed_interested_number);
+        invited = (TextView) findViewById(R.id.detailed_invited_number);
+        description = (TextView) findViewById(R.id.detailed_description);
+        mainImage = (ImageView) findViewById(R.id.detailed_image);
+        detail = (TextView) findViewById(R.id.detailed_details);
+        clockStartIcon = (ImageView) findViewById(R.id.clock2);
+        clockEndIcon = (ImageView) findViewById(R.id.clockEnd);
+        locationIcon = (ImageView) findViewById(R.id.location2);
+        checkIcon = (ImageView) findViewById(R.id.going_check);
+        starIcon = (ImageView) findViewById(R.id.interested_star);
+        invitedIcon = (ImageView) findViewById(R.id.detailed_invited_icon);
+        hostIcon = (ImageView) findViewById(R.id.host);
+        textGoing = (TextView) findViewById(R.id.detailed_going);
+        textInterested = (TextView) findViewById(R.id.detailed_interested);
+        textInvited = (TextView) findViewById(R.id.detailed_invited);
         mContext = this.getApplicationContext();
         setTitle("");
         accessToken = AccessToken.getCurrentAccessToken();
 
         if (savedInstanceState == null) {
             Bundle extras = getIntent().getExtras();
-            if(extras == null) {
-                pageId= null;
+            if (extras == null) {
+                pageId = null;
             } else {
-                pageId= extras.getString("pageId");
+                pageId = extras.getString("pageId");
             }
         } else {
-            pageId= (String) savedInstanceState.getSerializable("pageId");
+            pageId = (String) savedInstanceState.getSerializable("pageId");
         }
 
         new getEventDetailsAsync().execute(pageId);
@@ -104,21 +104,21 @@ public class DetailedEvent extends AppCompatActivity {
                             JSONObject jsonObject = response.getJSONObject();
 
                             //Add all the ids of the pages a user likes into an arraylist
-                            if (response != null) {
+                            if (response != null && jsonObject != null) {
                                 try {
                                     mTitle = (jsonObject.getString("name"));
                                     mStart_date = (jsonObject.getString("start_time"));
-                                    if(jsonObject.has("end_time")) {
+                                    if (jsonObject.has("end_time")) {
                                         mEnd_date = (jsonObject.getString("end_time"));
                                     }
                                     mLocation = (jsonObject.getJSONObject("place").getString("name").toString());
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("cover")
                                             .getString("source"));
-                                    mGoing=(jsonObject.getString("attending_count"));
-                                    mInterested=(jsonObject.getString("maybe_count"));
-                                    mInvited=(jsonObject.getString("noreply_count"));
-                                    mDescription=(jsonObject.getString("description"));
-                                    mHost=(jsonObject.getJSONObject("owner").getString("name"));
+                                    mGoing = (jsonObject.getString("attending_count"));
+                                    mInterested = (jsonObject.getString("maybe_count"));
+                                    mInvited = (jsonObject.getString("noreply_count"));
+                                    mDescription = (jsonObject.getString("description"));
+                                    mHost = (jsonObject.getJSONObject("owner").getString("name"));
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
@@ -135,24 +135,25 @@ public class DetailedEvent extends AppCompatActivity {
             super.onPostExecute(aVoid);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             try {
-                Date myDate = dateFormat.parse(mStart_date);
-                dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                String finalDate = dateFormat.format(myDate);
-                start_date.setText(finalDate);
-
+                if (mStart_date != null) {
+                    Date myDate = dateFormat.parse(mStart_date);
+                    dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    String finalDate = dateFormat.format(myDate);
+                    start_date.setText(finalDate);
+                }
                 dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-                if(mEnd_date!=null){
-                Date myDate2=dateFormat.parse(mEnd_date);
-                dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                String finalDate2=dateFormat.format(myDate2);
-                end_date.setText(finalDate2);
-            }
+                if (mEnd_date != null) {
+                    Date myDate2 = dateFormat.parse(mEnd_date);
+                    dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    String finalDate2 = dateFormat.format(myDate2);
+                    end_date.setText(finalDate2);
+                }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
             title.setText(mTitle);
-            location.setText("At "+mLocation);
-            host.setText("Hosted by "+mHost);
+            location.setText("At " + mLocation);
+            host.setText("Hosted by " + mHost);
             going.setText(mGoing);
             interested.setText(mInterested);
             invited.setText(mInvited);

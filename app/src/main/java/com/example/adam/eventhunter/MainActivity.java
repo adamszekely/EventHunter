@@ -699,10 +699,12 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     title.setText(mTitle);
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                     try {
-                        Date myDate = dateFormat.parse(mDate);
-                        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                        String finalDate = dateFormat.format(myDate);
-                        date.setText(finalDate);
+                        if (mDate != null) {
+                            Date myDate = dateFormat.parse(mDate);
+                            dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                            String finalDate = dateFormat.format(myDate);
+                            date.setText(finalDate);
+                        }
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -909,11 +911,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green", 64, 64))));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags", 64, 64))));
                                 }
                             }
                         }
@@ -932,18 +934,18 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green", 64, 64))));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags", 64, 64))));
                                 }
                             }
                         } else if (eventsList.get(i).endDate == null) {
                             if (eventsList.get(i).startDate.before(monday) && eventsList.get(i).startDate.after(friday)) {
                                 map.addMarker(new MarkerOptions()
                                         .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                        .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags",64,64))));
+                                        .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags", 64, 64))));
                             }
                         }
                     }
@@ -959,11 +961,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green", 64, 64))));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags", 64, 64))));
                                 }
                             }
                         }
@@ -977,11 +979,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags_green", 64, 64))));
                                 } else {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags",64,64))));
+                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("maps_and_flags", 64, 64))));
                                 }
                             }
                         }
@@ -1085,7 +1087,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             JSONObject jsonObject = response.getJSONObject();
 
                             //Add all the ids of the pages a user likes into an arraylist
-                            if (response != null) {
+                            if (response != null && jsonObject != null) {
                                 try {
                                     mTitle = (jsonObject.getString("name"));
                                     mDate = (jsonObject.getString("start_time"));
@@ -1149,8 +1151,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
         return new BitmapDrawable(mContext.getResources(), x);
     }
 
-    public Bitmap resizeMapIcons(String iconName,int width, int height){
-        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(),getResources().getIdentifier(iconName, "drawable", getPackageName()));
+    public Bitmap resizeMapIcons(String iconName, int width, int height) {
+        Bitmap imageBitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, false);
         return resizedBitmap;
     }

@@ -149,7 +149,7 @@ public class ListActivity extends AppCompatActivity {
                             JSONObject jsonObject = response.getJSONObject();
 
                             //Add all the ids of the pages a user likes into an arraylist
-                            if (response != null) {
+                            if (jsonObject != null) {
                                 try {
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
                                             .getString("url"));
