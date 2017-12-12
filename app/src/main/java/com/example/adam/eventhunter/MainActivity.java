@@ -105,7 +105,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Drawable drawable;
     private Marker mMarker;
     private int colorCodeDark;
+    private int firstTime=0;
     private SpinnerTrigger spinnerTrigger;
+
 
     // Flag for GPS status
     boolean isGPSEnabled = false;
@@ -243,7 +245,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             threedays = false;
                             chooseDates = false;
                             progressBar.setVisibility(View.VISIBLE);
+                            if(firstTime>0){
                             new setPinsOnMap().execute();
+                            }
+                            firstTime++;
                             break;
                         case "Weekend":
                             today = false;
@@ -541,10 +546,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
                                                 Date startDate = dateFormat.parse(strDate);
                                                 DateTime endTime = new DateTime(startDate);
-                                                Date endDate = endTime.plusDays(1).toDate();
-                                                Log.d("ENDDATE", endDate + "");
+                                                Date endDate = endTime.plusHours(6).toDate();
+
                                                 //Only save events from today on
                                                 if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
+                                                    Log.d("ENDDATE", endDate + "...."+event.getString("name"));
                                                     Log.d("JSONEvent", event.getString("name"));
                                                     //Only save events if it has a place object in the JSON
                                                     if (event.has("place")) {

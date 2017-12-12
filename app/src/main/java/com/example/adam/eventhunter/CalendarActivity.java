@@ -141,7 +141,7 @@ public class CalendarActivity extends AppCompatActivity {
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
                 listSize=0;
                 executed=0;
-                progressBar.setVisibility(View.VISIBLE);
+
                 if (eventAdapter.getCount() != 0) {
                     listView.setAdapter(null);
                     eventArrayList.removeAll(eventArrayList);
@@ -153,6 +153,7 @@ public class CalendarActivity extends AppCompatActivity {
                     }
                 }
                 while (!priorityQueueEvent.isEmpty()) {
+                    progressBar.setVisibility(View.VISIBLE);
                     new getEventDetailsAsync().execute(priorityQueueEvent.poll().getId());
                 }
             }
