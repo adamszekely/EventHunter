@@ -3,6 +3,7 @@ package com.example.adam.eventhunter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
@@ -11,6 +12,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -42,7 +44,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
+import android.Manifest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -74,6 +76,7 @@ public class FacebookActivity extends FragmentActivity {
 
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
+
 
         mAuth = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
@@ -108,27 +111,37 @@ public class FacebookActivity extends FragmentActivity {
 
     @Override
     protected void onResume() {
-        super.onResume();
-        ni = cm.getActiveNetworkInfo();
-        mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user == null) {
-                    return;
-                } else {
-
-                    if (ni != null) {
-                        Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+        super.onResume();  if (ActivityCompat.checkSelfPermission(FacebookActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(FacebookActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(FacebookActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            return;
+        }
+        else if (ActivityCompat.checkSelfPermission(FacebookActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(FacebookActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(FacebookActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            return;
+        }else {
+            ni = cm.getActiveNetworkInfo();
+            mAuth.addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+                @Override
+                public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user == null) {
+                        return;
                     } else {
-                        wcd.show(getSupportFragmentManager(), "Connection");
 
+                        if (ni != null) {
+                            Intent intent = new Intent(FacebookActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            wcd.show(getSupportFragmentManager(), "Connection");
+
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+
     }
 
     @Override
