@@ -145,11 +145,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
         Spinner dynamicSpinnerMap = (Spinner) findViewById(R.id.dynamic_spinner_map_type);
         ArrayAdapter<String> adapterMap = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.map_type_array));
+                R.layout.dropdown_item_layout, getResources().getStringArray(R.array.map_type_array));
 
         SpinnerTrigger dynamicSpinnerDates = (SpinnerTrigger) findViewById(R.id.dynamic_spinner_dates);
         ArrayAdapter<String> adapterDates = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, getResources().getStringArray(R.array.dates_array));
+                R.layout.dropdown_item_layout, getResources().getStringArray(R.array.dates_array));
 
         accessToken = AccessToken.getCurrentAccessToken();
         pagesList = new ArrayList<String>();
@@ -237,7 +237,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                        int position, long id) {
 
                 ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
-                //((TextView) parent.getChildAt(0)).setTextSize(20);
+               // ((TextView) parent.getChildAt(0)).setTextSize(20);
+
                     switch ((String) parent.getItemAtPosition(position)) {
                         case "Today":
                             today = true;
@@ -335,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             JSONObject jsonObject = response.getJSONObject();
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
-                                if (response != null) {
+                                if (response != null && jsonObject!=null) {
                                     //Get JSON array from "data" object from Facebook JSON
                                     JSONArray pagesIdArray = jsonObject.getJSONArray("data");
                                     for (int i = 0; i < pagesIdArray.length(); i++) {

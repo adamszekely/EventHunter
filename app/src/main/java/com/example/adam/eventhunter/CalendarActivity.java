@@ -89,10 +89,11 @@ public class CalendarActivity extends AppCompatActivity {
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
         eventAdapter = new EventAdapter(CalendarActivity.this, eventArrayList);
-
+        date=new Date();
         dates = new ArrayList<CalendarDay>();
 
         calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+        calendarView.setSelectedDate(date);
         BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         bottomNavigationMenuView.setItemIconTintList(null);
         bottomNavigationMenuView.setSelectedItemId(R.id.nav_calendar);
@@ -124,6 +125,8 @@ public class CalendarActivity extends AppCompatActivity {
 
         mDecorator = new DatesDecorator(dates, mContext);
         calendarView.addDecorator(mDecorator);
+
+        TodayShow();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -229,5 +232,27 @@ public class CalendarActivity extends AppCompatActivity {
 
         x = BitmapFactory.decodeStream(input);
         return new BitmapDrawable(mContext.getResources(), x);
+    }
+
+    private void TodayShow()
+    {
+        listSize=0;
+        executed=0;
+
+        if (eventAdapter.getCount() != 0) {
+            listView.setAdapter(null);
+            eventArrayList.removeAll(eventArrayList);
+        }
+        date=new Date();
+        for (int i = 0; i < events.size(); i++) {
+            if (CalendarDay.from(events.get(i).getStartDate()).equals(CalendarDay.from(date))) {
+                priorityQueueEvent.add(events.get(i));
+                listSize++;
+            }
+        }
+        while (!priorityQueueEvent.isEmpty()) {
+            progressBar.setVisibility(View.VISIBLE);
+            new getEventDetailsAsync().execute(priorityQueueEvent.poll().getId());
+        }
     }
 }
