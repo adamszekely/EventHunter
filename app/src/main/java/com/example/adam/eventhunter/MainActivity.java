@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
         colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
-        progressBar.setVisibility(View.VISIBLE);
+        //progressBar.setVisibility(View.VISIBLE);
         spinnerTrigger = new SpinnerTrigger(mContext);
         //End of initializations
 
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             progressBar.setVisibility(View.VISIBLE);
                             Intent intent = new Intent(MainActivity.this, ListActivity.class);
                             startActivity(intent);
-                            finish();
+                            progressBar.setVisibility(View.INVISIBLE);
                         } else {
                             Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
                         }
@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             progressBar.setVisibility(View.VISIBLE);
                             Intent intent3 = new Intent(MainActivity.this, CalendarActivity.class);
                             startActivity(intent3);
-                            finish();
+                            progressBar.setVisibility(View.INVISIBLE);
                         } else {
                             Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
                         }
@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                     }
                                 }
                             }, year, month, day);
-                            datePickerDialogTo.setPermanentTitle("Search until");
+                            datePickerDialogTo.setPermanentTitle("To");
                             datePickerDialogTo.show();
 
                             DatePickerDialogFragment datePickerDialogFrom = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
                                 }
                             }, year, month, day);
-                            datePickerDialogFrom.setPermanentTitle("Search from");
+                            datePickerDialogFrom.setPermanentTitle("From");
                             datePickerDialogFrom.show();
                             }else {
                                 Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();

@@ -97,13 +97,11 @@ public class ListActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.VISIBLE);
                         Intent intent = new Intent(ListActivity.this, MainActivity.class);
                         startActivity(intent);
-                        finish();
                         break;
                     case R.id.nav_calendar:
                         progressBar.setVisibility(View.VISIBLE);
                         Intent intent3 = new Intent(ListActivity.this, CalendarActivity.class);
                         startActivity(intent3);
-                        finish();
                         break;
                 }
                 return true;

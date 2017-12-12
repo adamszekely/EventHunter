@@ -103,12 +103,10 @@ public class CalendarActivity extends AppCompatActivity {
                     case R.id.nav_list:
                         Intent intent = new Intent(CalendarActivity.this, ListActivity.class);
                         startActivity(intent);
-                        finish();
                         break;
                     case R.id.nav_map:
                         Intent intent2 = new Intent(CalendarActivity.this, MainActivity.class);
                         startActivity(intent2);
-                        finish();
                         break;
                     case R.id.nav_calendar:
 
