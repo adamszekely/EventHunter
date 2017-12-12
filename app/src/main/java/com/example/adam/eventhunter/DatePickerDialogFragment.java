@@ -23,9 +23,14 @@ public class DatePickerDialogFragment extends DatePickerDialog {
 
     private CharSequence title;
 
+    public DatePickerDialogFragment(@NonNull Context context, int style, @Nullable OnDateSetListener listener, int year, int month, int dayOfMonth) {
+        super(context, style,listener, year, month, dayOfMonth);
+    }
+
     public DatePickerDialogFragment(@NonNull Context context, @Nullable OnDateSetListener listener, int year, int month, int dayOfMonth) {
         super(context, listener, year, month, dayOfMonth);
     }
+
     public void setPermanentTitle(CharSequence title) {
         this.title = title;
         setTitle(title);

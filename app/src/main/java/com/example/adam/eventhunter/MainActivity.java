@@ -1,5 +1,6 @@
 package com.example.adam.eventhunter;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Drawable drawable;
     private Marker mMarker;
     private int colorCodeDark;
-    private int firstTime=0;
+    private int firstTime = 0;
     private SpinnerTrigger spinnerTrigger;
 
 
@@ -161,6 +163,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
         //progressBar.setVisibility(View.VISIBLE);
         spinnerTrigger = new SpinnerTrigger(mContext);
+
+
         //End of initializations
 
         toolbar.setTitle("");
@@ -237,38 +241,38 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                        int position, long id) {
 
                 ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
-               // ((TextView) parent.getChildAt(0)).setTextSize(20);
+                // ((TextView) parent.getChildAt(0)).setTextSize(20);
 
-                    switch ((String) parent.getItemAtPosition(position)) {
-                        case "Today":
-                            today = true;
-                            weekend = false;
-                            threedays = false;
-                            chooseDates = false;
-                            progressBar.setVisibility(View.VISIBLE);
-                            if(firstTime>0){
+                switch ((String) parent.getItemAtPosition(position)) {
+                    case "Today":
+                        today = true;
+                        weekend = false;
+                        threedays = false;
+                        chooseDates = false;
+                        progressBar.setVisibility(View.VISIBLE);
+                        if (firstTime > 0) {
                             new setPinsOnMap().execute();
-                            }
-                            firstTime++;
-                            break;
-                        case "Weekend":
-                            today = false;
-                            weekend = true;
-                            threedays = false;
-                            chooseDates = false;
-                            progressBar.setVisibility(View.VISIBLE);
-                            new setPinsOnMap().execute();
-                            break;
-                        case "3 days":
-                            today = false;
-                            weekend = false;
-                            threedays = true;
-                            chooseDates = false;
-                            progressBar.setVisibility(View.VISIBLE);
-                            new setPinsOnMap().execute();
-                            break;
-                        case "Choose dates":
-                            if (executor.getActiveCount() == 0) {
+                        }
+                        firstTime++;
+                        break;
+                    case "Weekend":
+                        today = false;
+                        weekend = true;
+                        threedays = false;
+                        chooseDates = false;
+                        progressBar.setVisibility(View.VISIBLE);
+                        new setPinsOnMap().execute();
+                        break;
+                    case "3 days":
+                        today = false;
+                        weekend = false;
+                        threedays = true;
+                        chooseDates = false;
+                        progressBar.setVisibility(View.VISIBLE);
+                        new setPinsOnMap().execute();
+                        break;
+                    case "Choose dates":
+                        if (executor.getActiveCount() == 0) {
                             today = false;
                             weekend = false;
                             threedays = false;
@@ -278,37 +282,66 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             int year = c.get(Calendar.YEAR);
                             int month = c.get(Calendar.MONTH);
                             int day = c.get(Calendar.DAY_OF_MONTH);
-                            DatePickerDialogFragment datePickerDialogTo = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                DatePickerDialogFragment datePickerDialogTo = new DatePickerDialogFragment(MainActivity.this, android.R.style.Theme_Material_Light_Dialog_Alert, new DatePickerDialog.OnDateSetListener() {
 
-                                @Override
-                                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                    if ((new LocalDate(year, month + 1, day).toDate()).before(pickedStartDate)) {
-                                        Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        pickedEndDate = new LocalDate(year, month + 1, day).toDate();
-                                        new setPinsOnMap().execute();
+                                    @Override
+                                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                        if ((new LocalDate(year, month + 1, day).toDate()).before(pickedStartDate)) {
+                                            Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            pickedEndDate = new LocalDate(year, month + 1, day).toDate();
+                                            new setPinsOnMap().execute();
+                                        }
                                     }
-                                }
-                            }, year, month, day);
-                            datePickerDialogTo.setPermanentTitle("To");
-                            datePickerDialogTo.show();
+                                }, year, month, day);
+                                datePickerDialogTo.setPermanentTitle("To");
+                                datePickerDialogTo.show();
 
-                            DatePickerDialogFragment datePickerDialogFrom = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                                DatePickerDialogFragment datePickerDialogFrom = new DatePickerDialogFragment(MainActivity.this, android.R.style.Theme_Material_Light_Dialog_Alert, new DatePickerDialog.OnDateSetListener() {
 
-                                @Override
-                                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                                    pickedStartDate = new LocalDate(year, month + 1, day).toDate();
-                                    Log.d("INSIDE", "Start");
+                                    @Override
+                                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                        pickedStartDate = new LocalDate(year, month + 1, day).toDate();
+                                        Log.d("INSIDE", "Start");
 
-                                }
-                            }, year, month, day);
-                            datePickerDialogFrom.setPermanentTitle("From");
-                            datePickerDialogFrom.show();
-                            }else {
-                                Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
+                                    }
+                                }, year, month, day);
+                                datePickerDialogFrom.setPermanentTitle("From");
+                                datePickerDialogFrom.show();
+                            } else {
+                                DatePickerDialogFragment datePickerDialogTo = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+
+                                    @Override
+                                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                        if ((new LocalDate(year, month + 1, day).toDate()).before(pickedStartDate)) {
+                                            Toast.makeText(MainActivity.this, "End date cannot be before the start date\nChoose another date", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            pickedEndDate = new LocalDate(year, month + 1, day).toDate();
+                                            new setPinsOnMap().execute();
+                                        }
+                                    }
+                                }, year, month, day);
+                                datePickerDialogTo.setPermanentTitle("To");
+                                datePickerDialogTo.show();
+
+                                DatePickerDialogFragment datePickerDialogFrom = new DatePickerDialogFragment(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+
+                                    @Override
+                                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                                        pickedStartDate = new LocalDate(year, month + 1, day).toDate();
+                                        Log.d("INSIDE", "Start");
+
+                                    }
+                                }, year, month, day);
+                                datePickerDialogFrom.setPermanentTitle("From");
+                                datePickerDialogFrom.show();
                             }
-                            break;
-                    }
+                        } else {
+                            Toast.makeText(MainActivity.this, "Wait for downloading", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                }
             }
 
             @Override
@@ -336,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             JSONObject jsonObject = response.getJSONObject();
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
-                                if (response != null && jsonObject!=null) {
+                                if (response != null && jsonObject != null) {
                                     //Get JSON array from "data" object from Facebook JSON
                                     JSONArray pagesIdArray = jsonObject.getJSONArray("data");
                                     for (int i = 0; i < pagesIdArray.length(); i++) {
@@ -355,6 +388,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                             noData[0] = true;
                                     } else
                                         noData[0] = true;
+                                } else {
+                                    noData[0] = true;
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -403,7 +438,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             Log.d("PAGEID2", pageId + "");
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
-                                if (response != null) {
+                                if (response != null && jsonObject != null) {
                                     JSONArray eventsArray = jsonObject.getJSONArray("data");
                                     if (eventsArray.length() == 0) {
                                         Log.d("Pagelist", "Page list is empty");
@@ -456,8 +491,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                         } else
                                             noData[0] = true;
                                     }
-                                } else
+                                } else {
                                     noData[0] = true;
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             } catch (ParseException e) {
@@ -491,7 +527,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
-                                if (response != null) {
+                                if (response != null && jsonObject != null) {
                                     JSONArray eventsArray = jsonObject.getJSONArray("data");
                                     if (eventsArray.length() == 0) {
                                         Log.d("Pagelist", "Page list is empty");
@@ -551,7 +587,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
                                                 //Only save events from today on
                                                 if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
-                                                    Log.d("ENDDATE", endDate + "...."+event.getString("name"));
+                                                    Log.d("ENDDATE", endDate + "...." + event.getString("name"));
                                                     Log.d("JSONEvent", event.getString("name"));
                                                     //Only save events if it has a place object in the JSON
                                                     if (event.has("place")) {
@@ -596,8 +632,9 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                         } else
                                             noData[0] = true;
                                     }
-                                } else
+                                } else {
                                     noData[0] = true;
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             } catch (ParseException e) {
@@ -826,11 +863,18 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.nav_refresh:
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+                break;
+
+
             case R.id.nav_logout:
                 mAuth.signOut();
                 LoginManager.getInstance().logOut();
-                Intent intent = new Intent(MainActivity.this, FacebookActivity.class);
-                startActivity(intent);
+                Intent intent2 = new Intent(MainActivity.this, FacebookActivity.class);
+                startActivity(intent2);
                 finish();
                 break;
 
@@ -1094,7 +1138,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         }
     }
 
-    public static Drawable drawableFromUrl(String url) throws IOException {
+    public Drawable drawableFromUrl(String url) throws IOException {
         Bitmap x;
 
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
@@ -1106,7 +1150,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
     }
 
     public static List<Event> getListOfEvents() {
-        Log.i("LastINQUEUE", eventsList.size() + "");
+        //Log.i("LastINQUEUE", eventsList.size() + "");
         return eventsList;
     }
 }
