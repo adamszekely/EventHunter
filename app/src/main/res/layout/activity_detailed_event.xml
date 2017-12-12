@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,49 +7,57 @@
     android:orientation="vertical"
     tools:context="com.example.adam.eventhunter.DetailedEvent">
 
-    <android.support.constraint.ConstraintLayout
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarEventDetail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat">
 
-
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appBarEventDetail"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolBarEventDetail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat">
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="center"
+            android:background="@color/colorPrimary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolBarEventDetail"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+            <TextView
+                android:id="@+id/toolbar_title_event_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/locationBtn"
+                android:layout_centerHorizontal="true"
                 android:layout_gravity="center"
-                android:background="@color/colorPrimary"
-                app:popupTheme="@style/ThemeOverlay.AppCompat">
+                android:text="Event information"
+                android:textColor="@color/com_facebook_button_background_color_focused"
+                android:textSize="18dp" />
 
-                <TextView
-                    android:id="@+id/toolbar_title_event_detail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@+id/locationBtn"
-                    android:layout_centerHorizontal="true"
-                    android:layout_gravity="center"
-                    android:text="Event information"
-                    android:textColor="@color/com_facebook_button_background_color_focused"
-                    android:textSize="18dp" />
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
 
-            </android.support.v7.widget.Toolbar>
-        </android.support.design.widget.AppBarLayout>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/appBarEventDetail"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
 
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/main_constraint"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
 
         <ImageView
             android:id="@+id/detailed_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="@id/appBarEventDetail"
+            app:layout_constraintEnd_toEndOf="@id/main_constraint"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/appBarEventDetail" />
+            app:layout_constraintTop_toBottomOf="@+id/main_constraint" />
 
         <ProgressBar
             android:id="@+id/progress_bar_detail"
@@ -83,10 +91,10 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="3dp"
             android:src="@drawable/ic_alarm"
+            android:visibility="invisible"
             app:layout_constraintRight_toLeftOf="@id/detailed_date_start"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/detailed_date_start"
-            android:visibility="invisible"/>
+            app:layout_constraintTop_toTopOf="@id/detailed_date_start" />
 
         <TextView
             android:id="@+id/detailed_date_start"
@@ -103,13 +111,13 @@
             android:id="@+id/clockEnd"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:src="@drawable/ic_alarm_end"
             android:layout_marginStart="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/detailed_date_end"
-            app:layout_constraintTop_toTopOf="@id/detailed_date_end"
             android:layout_marginTop="3dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_alarm_end"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@id/detailed_date_end"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/detailed_date_end" />
 
         <TextView
             android:id="@+id/detailed_date_end"
@@ -125,13 +133,13 @@
             android:id="@+id/host"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:src="@drawable/ic_host"
             android:layout_marginStart="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/detailed_hostedby"
-            app:layout_constraintTop_toTopOf="@id/detailed_hostedby"
             android:layout_marginTop="3dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_host"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@id/detailed_hostedby"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/detailed_hostedby" />
 
         <TextView
             android:id="@+id/detailed_hostedby"
@@ -147,13 +155,13 @@
             android:id="@+id/location2"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:src="@drawable/ic_location"
             android:layout_marginStart="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/detailed_location"
-            app:layout_constraintTop_toTopOf="@id/detailed_location"
             android:layout_marginTop="3dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_location"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@id/detailed_location"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/detailed_location" />
 
         <TextView
             android:id="@+id/detailed_location"
@@ -172,11 +180,11 @@
             android:layout_marginTop="12dp"
             android:paddingStart="4dp"
             android:text="Details"
-            android:textSize="17sp"
             android:textColor="#F000"
+            android:textSize="17sp"
+            android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detailed_interested_number"
-            android:visibility="invisible"/>
+            app:layout_constraintTop_toBottomOf="@+id/detailed_interested_number" />
 
         <TextView
             android:id="@+id/detailed_description"
@@ -191,33 +199,33 @@
             android:id="@+id/going_check"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:src="@drawable/ic_check_circle"
             android:layout_marginStart="20dp"
-            app:layout_constraintRight_toLeftOf="@id/detailed_going"
-            app:layout_constraintTop_toTopOf="@id/detailed_going"
             android:layout_marginTop="1dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_check_circle"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@id/detailed_going"
+            app:layout_constraintTop_toTopOf="@id/detailed_going" />
 
         <TextView
             android:id="@+id/detailed_going"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Going"
+            android:visibility="invisible"
             app:layout_constraintEnd_toStartOf="@+id/detailed_interested"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/detailed_interested"
-            android:visibility="invisible"/>
+            app:layout_constraintTop_toTopOf="@+id/detailed_interested" />
 
         <ImageView
             android:id="@+id/interested_star"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:src="@drawable/ic_circle_star"
             android:layout_marginStart="20dp"
-            app:layout_constraintRight_toLeftOf="@id/detailed_interested"
-            app:layout_constraintTop_toTopOf="@id/detailed_interested"
             android:layout_marginTop="1dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_circle_star"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@id/detailed_interested"
+            app:layout_constraintTop_toTopOf="@id/detailed_interested" />
 
         <TextView
             android:id="@+id/detailed_interested"
@@ -226,21 +234,21 @@
 
             android:layout_marginTop="8dp"
             android:text="Interested"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detailed_location"
-            android:visibility="invisible"/>
+            app:layout_constraintTop_toBottomOf="@+id/detailed_location" />
 
         <ImageView
             android:id="@+id/detailed_invited_icon"
             android:layout_width="17dp"
             android:layout_height="17dp"
-            android:src="@drawable/ic_invited"
             android:layout_marginEnd="2dp"
-            app:layout_constraintRight_toLeftOf="@id/detailed_invited"
-            app:layout_constraintTop_toTopOf="@id/detailed_invited"
             android:layout_marginTop="1dp"
-            android:visibility="invisible"/>
+            android:src="@drawable/ic_invited"
+            android:visibility="invisible"
+            app:layout_constraintRight_toLeftOf="@id/detailed_invited"
+            app:layout_constraintTop_toTopOf="@id/detailed_invited" />
 
         <TextView
             android:id="@+id/detailed_invited"
@@ -248,10 +256,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Invited"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/detailed_interested"
-            app:layout_constraintTop_toBottomOf="@+id/detailed_location"
-            android:visibility="invisible"/>
+            app:layout_constraintTop_toBottomOf="@+id/detailed_location" />
 
         <TextView
             android:id="@+id/detailed_going_number"
@@ -287,7 +295,6 @@
             app:layout_constraintHorizontal_bias="0.57"
             app:layout_constraintStart_toEndOf="@+id/detailed_interested_number"
             app:layout_constraintTop_toBottomOf="@+id/detailed_invited" />
-
-
-    </android.support.constraint.ConstraintLayout>
-</ScrollView>
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</android.support.constraint.ConstraintLayout>
