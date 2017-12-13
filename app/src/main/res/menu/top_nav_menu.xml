@@ -8,8 +8,12 @@
         app:showAsAction="always">
     </item>
     <item
+        android:id="@+id/nav_about"
+        android:title="About"
+        app:showAsAction="never">
+    </item>
+    <item
         android:id="@+id/nav_logout"
-        android:icon="@drawable/ic_exit"
         android:title="Logout"
         app:showAsAction="never">
     </item>

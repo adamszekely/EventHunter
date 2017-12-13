@@ -873,12 +873,16 @@ public class MainActivity extends AppCompatActivity implements android.location.
                 finish();
                 break;
 
+            case R.id.nav_about:
+                Intent intent2 = new Intent(MainActivity.this, AboutActivity.class);
+                startActivity(intent2);
+                break;
 
             case R.id.nav_logout:
                 mAuth.signOut();
                 LoginManager.getInstance().logOut();
-                Intent intent2 = new Intent(MainActivity.this, FacebookActivity.class);
-                startActivity(intent2);
+                Intent intent3 = new Intent(MainActivity.this, FacebookActivity.class);
+                startActivity(intent3);
                 finish();
                 break;
 
