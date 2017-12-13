@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter.model;
+package com.eventhunters.eventhunter.model;
 
 import android.app.Activity;
 import android.support.annotation.Nullable;
@@ -9,7 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.adam.eventhunter.R;
+
+import com.eventhunters.eventhunter.R;
 
 import java.util.ArrayList;
 

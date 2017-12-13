@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter.model;
+package com.eventhunters.eventhunter.model;
 
 import android.graphics.drawable.Drawable;
 import android.widget.Button;

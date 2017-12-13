@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter;
+package com.eventhunters.eventhunter;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

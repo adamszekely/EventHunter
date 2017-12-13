@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter;
+package com.eventhunters.eventhunter;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -10,7 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.widget.DatePicker;
 
-import com.example.adam.eventhunter.MainActivity;
+
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

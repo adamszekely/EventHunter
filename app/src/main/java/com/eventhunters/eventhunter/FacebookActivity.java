@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter;
+package com.eventhunters.eventhunter;
 
 import android.content.Context;
 import android.content.Intent;

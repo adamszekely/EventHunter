@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter;
+package com.eventhunters.eventhunter;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -41,7 +41,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.example.adam.eventhunter.PriorityQueue.PriorityQueueEvent;
+
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;

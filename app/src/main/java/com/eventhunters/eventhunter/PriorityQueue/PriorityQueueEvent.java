@@ -1,6 +1,6 @@
-package com.example.adam.eventhunter.PriorityQueue;
+package com.eventhunters.eventhunter.PriorityQueue;
 
-import com.example.adam.eventhunter.Event;
+import com.eventhunters.eventhunter.Event;
 
 import java.util.Vector;
 

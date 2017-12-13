@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter;
+package com.eventhunters.eventhunter;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

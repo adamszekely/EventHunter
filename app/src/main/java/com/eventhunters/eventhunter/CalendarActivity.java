@@ -1,4 +1,4 @@
-package com.example.adam.eventhunter;
+package com.eventhunters.eventhunter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,26 +9,34 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationMenuView;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
+import com.eventhunters.eventhunter.PriorityQueue.*;
 
-import com.example.adam.eventhunter.PriorityQueue.PriorityQueueEvent;
-import com.example.adam.eventhunter.model.EventActivity;
-import com.example.adam.eventhunter.model.EventAdapter;
+import com.eventhunters.eventhunter.model.EventActivity;
+import com.eventhunters.eventhunter.model.EventAdapter;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.DayViewDecorator;
+import com.prolificinteractive.materialcalendarview.DayViewFacade;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.prolificinteractive.materialcalendarview.format.DayFormatter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,97 +48,119 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
-public class ListActivity extends AppCompatActivity {
+public class CalendarActivity extends AppCompatActivity {
 
-    AccessToken accessToken;
+    private Toolbar toolbar;
+    private MaterialCalendarView calendarView;
     private static Context mContext;
-    ArrayList<EventActivity> eventArrayList;
-    ProgressBar progressBar;
-    List<Event> events;
-    BottomNavigationView bottomNavigationMenuView;
-    ThreadPoolExecutor executor;
-    boolean addedFooter;
-    View view;
-    ListView listView;
-    Button buttonMore;
-    PriorityQueueEvent priorityQueueEvent;
-    int exeNumber=0;
+    private List<Event> events;
+    private PriorityQueueEvent priorityQueueEvent;
+    private AccessToken accessToken;
+    private Date date;
+    private List<CalendarDay> dates;
+    private DatesDecorator mDecorator;
+    private ArrayList<EventActivity> eventArrayList;
+    private ListView listView;
+    private EventAdapter eventAdapter;
+    private ProgressBar progressBar;
+    private int executed,listSize;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
-        events = MainActivity.getListOfEvents();
-        accessToken = AccessToken.getCurrentAccessToken();
-        priorityQueueEvent = new PriorityQueueEvent();
+        setContentView(R.layout.activity_calendar);
+        listView = (ListView) findViewById(R.id.listView);
         mContext = this.getApplicationContext();
+        accessToken = AccessToken.getCurrentAccessToken();
+        events = MainActivity.getListOfEvents();
+        priorityQueueEvent = new PriorityQueueEvent();
         eventArrayList = new ArrayList<EventActivity>();
-        bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
-        progressBar = (ProgressBar) findViewById(R.id.progressBarList);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar_calendar);
         int colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
-        listView = (ListView) findViewById(R.id.listView_list);
-        view = getLayoutInflater().inflate(R.layout.more_button_layout, listView, false);
-        executor = new ThreadPoolExecutor(12, 20, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(2));
-        for (int i = 0; i < events.size(); i++) {
-            priorityQueueEvent.add(events.get(i));
-        }
         progressBar.setVisibility(View.INVISIBLE);
-        //Bottom navigation menu
+        setTitle("");
+        toolbar = (Toolbar) findViewById(R.id.toolBar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+        eventAdapter = new EventAdapter(CalendarActivity.this, eventArrayList);
+        date=new Date();
+        dates = new ArrayList<CalendarDay>();
+
+        calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+        calendarView.setSelectedDate(date);
+        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         bottomNavigationMenuView.setItemIconTintList(null);
-        bottomNavigationMenuView.setSelectedItemId(R.id.nav_list);
+        bottomNavigationMenuView.setSelectedItemId(R.id.nav_calendar);
         bottomNavigationMenuView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.nav_list:
-                        break;
-                    case R.id.nav_map:
-                        progressBar.setVisibility(View.VISIBLE);
-                        Intent intent = new Intent(ListActivity.this, MainActivity.class);
+                        Intent intent = new Intent(CalendarActivity.this, ListActivity.class);
                         startActivity(intent);
                         break;
+                    case R.id.nav_map:
+                        Intent intent2 = new Intent(CalendarActivity.this, MainActivity.class);
+                        startActivity(intent2);
+                        break;
                     case R.id.nav_calendar:
-                        progressBar.setVisibility(View.VISIBLE);
-                        Intent intent3 = new Intent(ListActivity.this, CalendarActivity.class);
-                        startActivity(intent3);
+
                         break;
                 }
                 return true;
             }
         });
-        //End of bottom navigation menu
-        downloadTenMore();
 
-        buttonMore = view.findViewById(R.id.buttonMore);
 
-        buttonMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!priorityQueueEvent.isEmpty()) {
+        for (int i = 0; i < events.size(); i++) {
+            date = events.get(i).getStartDate();
+            dates.add(CalendarDay.from(date));
+        }
 
-                    downloadTenMore();
-                }
-            }
-        });
+        mDecorator = new DatesDecorator(dates, mContext);
+        calendarView.addDecorator(mDecorator);
+
+        TodayShow();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent=new Intent(ListActivity.this,DetailedEvent.class);
+                Intent intent=new Intent(CalendarActivity.this,DetailedEvent.class);
                 intent.putExtra("pageId",eventArrayList.get(position).getId());
                 startActivity(intent);
             }
         });
+
+        calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                listSize=0;
+                executed=0;
+
+                if (eventAdapter.getCount() != 0) {
+                    listView.setAdapter(null);
+                    eventArrayList.removeAll(eventArrayList);
+                }
+                for (int i = 0; i < events.size(); i++) {
+                    if (CalendarDay.from(events.get(i).getStartDate()).equals(date)) {
+                        priorityQueueEvent.add(events.get(i));
+                        listSize++;
+                    }
+                }
+                while (!priorityQueueEvent.isEmpty()) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    new getEventDetailsAsync().execute(priorityQueueEvent.poll().getId());
+                }
+            }
+        });
     }
+
 
     private class getEventDetailsAsync extends AsyncTask<String, Void, Void> {
         Drawable drawable;
@@ -147,9 +177,9 @@ public class ListActivity extends AppCompatActivity {
                     new GraphRequest.Callback() {
                         public void onCompleted(GraphResponse response) {
                             JSONObject jsonObject = response.getJSONObject();
-
+                            Log.d("JSONRESPONSE", response.getRawResponse() + "");
                             //Add all the ids of the pages a user likes into an arraylist
-                            if (jsonObject != null) {
+                            if (!response.equals("null") && jsonObject!=null) {
                                 try {
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")
                                             .getString("url"));
@@ -159,7 +189,7 @@ public class ListActivity extends AppCompatActivity {
                                         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                                         String finalDate = dateFormat.format(myDate);
 
-                                        eventArrayList.add(new EventActivity(jsonObject.getString("id"),jsonObject.getString("name"),
+                                        eventArrayList.add(new EventActivity(jsonObject.getString("id"), jsonObject.getString("name"),
                                                 finalDate, jsonObject.getJSONObject("place").getString("name"),
                                                 drawable, "Going: " + (jsonObject.getString("attending_count")),
                                                 "Interested: " + (jsonObject.getString("maybe_count"))));
@@ -171,6 +201,8 @@ public class ListActivity extends AppCompatActivity {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
+                            } else {
+                                Log.d("ERROR", "Response is null");
                             }
                         }
                     }).executeAndWait();
@@ -180,26 +212,14 @@ public class ListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            EventAdapter eventAdapter = new EventAdapter(ListActivity.this, eventArrayList);
-            if (!addedFooter) {
-                listView.addFooterView(view);
-                addedFooter = true;
-            }
 
             listView.setAdapter(eventAdapter);
-
-            exeNumber++;
-            if(exeNumber==10 || priorityQueueEvent.isEmpty())
-            {
-                listView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listView.setSelection(eventArrayList.size()-10);
-                    }
-                });
+            listView.setVisibility(View.VISIBLE);
+            executed++;
+            if(executed==listSize){
                 progressBar.setVisibility(View.INVISIBLE);
-                exeNumber=0;
             }
+
         }
     }
 
@@ -214,13 +234,25 @@ public class ListActivity extends AppCompatActivity {
         return new BitmapDrawable(mContext.getResources(), x);
     }
 
-    private void downloadTenMore() {
-        progressBar.setVisibility(View.VISIBLE);
-        for (int i = 0; i < 10; i++) {
-            new getEventDetailsAsync().execute(priorityQueueEvent.poll().getId());
-            if (priorityQueueEvent.isEmpty()) {
-                break;
+    private void TodayShow()
+    {
+        listSize=0;
+        executed=0;
+
+        if (eventAdapter.getCount() != 0) {
+            listView.setAdapter(null);
+            eventArrayList.removeAll(eventArrayList);
+        }
+        date=new Date();
+        for (int i = 0; i < events.size(); i++) {
+            if (CalendarDay.from(events.get(i).getStartDate()).equals(CalendarDay.from(date))) {
+                priorityQueueEvent.add(events.get(i));
+                listSize++;
             }
+        }
+        while (!priorityQueueEvent.isEmpty()) {
+            progressBar.setVisibility(View.VISIBLE);
+            new getEventDetailsAsync().execute(priorityQueueEvent.poll().getId());
         }
     }
 }
