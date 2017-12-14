@@ -1,6 +1,7 @@
 package com.eventhunters.eventhunter;
 
-import android.app.AlertDialog;
+import android.*;
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -21,8 +22,6 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -34,14 +33,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
+import com.eventhunters.eventhunter.Fragments.DatePickerDialogFragment;
+import com.eventhunters.eventhunter.Util.SpinnerTrigger;
+import com.eventhunters.eventhunter.model.Event;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -52,7 +51,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -74,16 +72,15 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements android.location.LocationListener, OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements android.location.LocationListener,
+        OnMapReadyCallback {
     private GoogleMap map;
     protected LocationRequest mLocationRequest;
     private LatLng newLocation;
@@ -93,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private FirebaseAuth mAuth;
     ConnectivityManager cm;
     AccessToken accessToken;
-    private String userId;
     private List<String> pagesList;
     private static List<Event> eventsList;
     private boolean today, weekend, threedays, chooseDates, downloaded;
@@ -110,7 +106,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
     private Marker mMarker;
     private int colorCodeDark;
     private int firstTime = 0;
-    private SpinnerTrigger spinnerTrigger;
+    private SpinnerTrigger dynamicSpinnerDates;
+    private Spinner dynamicSpinnerMap;
 
 
     // Flag for GPS status
@@ -147,11 +144,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
         bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
         toolbar = (Toolbar) findViewById(R.id.toolBar);
 
-        Spinner dynamicSpinnerMap = (Spinner) findViewById(R.id.dynamic_spinner_map_type);
+        dynamicSpinnerMap = (Spinner) findViewById(R.id.dynamic_spinner_map_type);
         ArrayAdapter<String> adapterMap = new ArrayAdapter<String>(this,
                 R.layout.dropdown_item_layout, getResources().getStringArray(R.array.map_type_array));
 
-        SpinnerTrigger dynamicSpinnerDates = (SpinnerTrigger) findViewById(R.id.dynamic_spinner_dates);
+        dynamicSpinnerDates = (SpinnerTrigger) findViewById(R.id.dynamic_spinner_dates);
         ArrayAdapter<String> adapterDates = new ArrayAdapter<String>(this,
                 R.layout.dropdown_item_layout, getResources().getStringArray(R.array.dates_array));
 
@@ -163,10 +160,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         progressBar = (ProgressBar) findViewById(R.id.progressBar2);
         colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
-        //progressBar.setVisibility(View.VISIBLE);
-        spinnerTrigger = new SpinnerTrigger(mContext);
-
-
         //End of initializations
 
         toolbar.setTitle("");
@@ -214,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
                 ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
-                //((TextView) parent.getChildAt(0)).setTextSize(20);
                 switch ((String) parent.getItemAtPosition(position)) {
                     case "Normal":
                         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -230,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                // TODO Auto-generated method stub
             }
         });
         //End of map type drop-down list
@@ -243,7 +234,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                        int position, long id) {
 
                 ((TextView) parent.getChildAt(0)).setTextColor(getResources().getColor(R.color.colorPrimary));
-                // ((TextView) parent.getChildAt(0)).setTextSize(20);
 
                 switch ((String) parent.getItemAtPosition(position)) {
                     case "Today":
@@ -371,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
                             JSONObject jsonObject = response.getJSONObject();
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
-                                if (response != null && jsonObject != null) {
+                                if (jsonObject != null) {
                                     //Get JSON array from "data" object from Facebook JSON
                                     JSONArray pagesIdArray = jsonObject.getJSONArray("data");
                                     for (int i = 0; i < pagesIdArray.length(); i++) {
@@ -526,18 +516,15 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     new GraphRequest.Callback() {
                         public void onCompleted(GraphResponse response) {
                             JSONObject jsonObject = response.getJSONObject();
-
                             //Add all the ids of the pages a user likes into an arraylist
                             try {
                                 if (response != null && jsonObject != null) {
                                     JSONArray eventsArray = jsonObject.getJSONArray("data");
                                     if (eventsArray.length() == 0) {
-                                        Log.d("Pagelist", "Page list is empty");
                                         noData[0] = true;
                                     } else {
                                         for (int i = 0; i < eventsArray.length(); i++) {
                                             JSONObject event = eventsArray.getJSONObject(i);
-
                                             if (event.has("start_time") && event.has("end_time")) {
                                                 //Parsing a date in a string to a Date type
                                                 String strDate = event.getString("start_time");
@@ -545,11 +532,8 @@ public class MainActivity extends AppCompatActivity implements android.location.
                                                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
                                                 Date startDate = dateFormat.parse(strDate);
                                                 Date endDate = dateFormat.parse(eDate);
-
-
                                                 //Only save events from today on
                                                 if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
-                                                    Log.d("JSONEvent", event.getString("name"));
                                                     //Only save events if it has a place object in the JSON
                                                     if (event.has("place")) {
                                                         //Only save events if it has a location object inside the place object in the JSON
@@ -589,8 +573,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
                                                 //Only save events from today on
                                                 if (startDate.after(now) || (startDate.before(now) && endDate.after(now))) {
-                                                    Log.d("ENDDATE", endDate + "...." + event.getString("name"));
-                                                    Log.d("JSONEvent", event.getString("name"));
                                                     //Only save events if it has a place object in the JSON
                                                     if (event.has("place")) {
                                                         //Only save events if it has a location object inside the place object in the JSON
@@ -683,9 +665,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
             @Override
             public View getInfoContents(Marker marker) {
                 View v = getLayoutInflater().inflate(R.layout.activity_preview, null);
-                /*ProgressBar progressBarInfo = (ProgressBar) v.findViewById(R.id.progressBar4);
-                progressBarInfo.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
-                progressBarInfo.setVisibility(View.VISIBLE);*/
                 title = (TextView) v.findViewById(R.id.title);
                 address = (TextView) v.findViewById(R.id.address);
                 date = (TextView) v.findViewById(R.id.date);
@@ -719,7 +698,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     checkIcon.setVisibility(View.VISIBLE);
                     starIcon.setVisibility(View.VISIBLE);
                     downloaded = false;
-                    // progressBarInfo.setVisibility(View.INVISIBLE);
                 }
                 return v;
             }
@@ -727,16 +705,23 @@ public class MainActivity extends AppCompatActivity implements android.location.
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                //Toast.makeText(MainActivity.this, "Implementation later", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(MainActivity.this, DetailedEvent.class);
+                Intent intent = new Intent(MainActivity.this,
+                        DetailedEventActivity.class);
                 intent.putExtra("pageId", marker.getTitle());
                 startActivity(intent);
 
             }
         });
 
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // request the missing permissions, and then overriding
+        if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(MainActivity.this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
             return;
         }
         //Enables the user's precise location and updates the UI
@@ -744,7 +729,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         updateUI();
         //Retrieves the pages the user liked
         new getPagesAsync().executeOnExecutor(executor);
-
     }
 
     public Location getLocation() {
@@ -905,7 +889,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             LocalDate nowTime = new LocalDate();
-            DateTime dateTime = new DateTime();
             map.clear();
             if (connected) {
                 if (today == true) {
@@ -914,14 +897,21 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null) {
                             if (eventsList.get(i).startDate.before(tomorrow)) {
-                                if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
+                                if (eventsList.get(i).startDate.before(now) &&
+                                        eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
-                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_green_marker)));
+                                            .position(new LatLng(eventsList.get(i).lat,
+                                                    eventsList.get(i).lng))
+                                            .title(eventsList.get(i).id).icon(
+                                                    BitmapDescriptorFactory.fromResource(
+                                                            R.drawable.ic_green_marker)));
                                 } else {
                                     map.addMarker(new MarkerOptions()
-                                            .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
-                                            .title(eventsList.get(i).id).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_red_marker)));
+                                            .position(new LatLng(eventsList.get(i).lat,
+                                                    eventsList.get(i).lng))
+                                            .title(eventsList.get(i).id).icon(
+                                                    BitmapDescriptorFactory.
+                                                            fromResource(R.drawable.ic_red_marker)));
                                 }
                             }
                         }
@@ -931,12 +921,10 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     LocalDate next = nowTime.plusDays(8 - old);
                     Date monday = next.toDate();
                     Date friday = nowTime.withDayOfWeek(DateTimeConstants.FRIDAY).toDate();
-
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null && eventsList.get(i).endDate != null) {
                             if (eventsList.get(i).startDate.before(monday) && ((eventsList.get(i).startDate.before(friday) && eventsList.get(i).endDate.after(friday)) || eventsList.get(i).startDate.after(friday))) {
-                                Log.d("WEEKEND", eventsList.get(i).startDate + ",    " + eventsList.get(i).endDate);
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
@@ -956,14 +944,11 @@ public class MainActivity extends AppCompatActivity implements android.location.
                         }
                     }
                 } else if (threedays == true) {
-
                     Date three = nowTime.plusDays(3).toDate();
-                    Log.d("TIMES2", three + " THREE");
                     //Go through the list of events and add a pin to the map for each one
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null) {
                             if (eventsList.get(i).startDate.before(three)) {
-                                Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
@@ -981,7 +966,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     for (int i = 0; i < eventsList.size(); i++) {
                         if (eventsList.get(i).startDate != null && eventsList.get(i).endDate != null) {
                             if (eventsList.get(i).startDate.before(pickedEndDate) && ((eventsList.get(i).startDate.before(pickedStartDate) && eventsList.get(i).endDate.after(pickedStartDate)) || eventsList.get(i).startDate.after(pickedStartDate))) {
-                                Log.d("TIMES", eventsList.get(i).startDate + ", " + now);
                                 if (eventsList.get(i).startDate.before(now) && eventsList.get(i).endDate.after(now)) {
                                     map.addMarker(new MarkerOptions()
                                             .position(new LatLng(eventsList.get(i).lat, eventsList.get(i).lng))
@@ -996,7 +980,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
                     }
                 }
                 progressBar.setVisibility(View.INVISIBLE);
-
             }
         }
     }
@@ -1006,7 +989,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected Void doInBackground(Void... voids) {
             getPages();
-
             return null;
         }
 
@@ -1014,8 +996,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progressBar.setVisibility(View.VISIBLE);
-            Log.d("JSON", pagesList.size() + "");
-            Log.d("JSONEvent", eventsList.size() + "");
         }
     }
 
@@ -1023,7 +1003,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
         @Override
         protected Void doInBackground(Integer... pageArrayLength) {
-            Log.d("Pagelist", pageArrayLength[1] + ", " + pageArrayLength[0] + " here");
             for (int i = pageArrayLength[1]; i < pageArrayLength[0]; i++) {
                 getEvents(pagesList.get(i));
             }
@@ -1033,7 +1012,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            //new setPinsOnMap().execute();
         }
     }
 
@@ -1051,8 +1029,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            // new setPinsOnMap().execute();
-            Log.d("JSONEvent", eventsList.size() + "");
         }
     }
 
@@ -1073,8 +1049,6 @@ public class MainActivity extends AppCompatActivity implements android.location.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            //new setPinsOnMap().execute();
-            Log.d("JSONEvent", eventsList.size() + "");
         }
     }
 
@@ -1157,31 +1131,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         return new BitmapDrawable(mContext.getResources(), x);
     }
 
-    public Bitmap resizeMapIcons(String iconName, int width, int height) {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), getResources().getIdentifier(iconName, "drawable", getPackageName()));
-        Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
-        Drawable drawable = new BitmapDrawable(mContext.getResources(), resizedBitmap);
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
     public static List<Event> getListOfEvents() {
-        //Log.i("LastINQUEUE", eventsList.size() + "");
         return eventsList;
     }
 }

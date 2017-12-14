@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.example.adam.eventhunter.DetailedEvent">
+    tools:context="com.eventhunters.eventhunter.DetailedEventActivity">
 
 
     <android.support.design.widget.AppBarLayout

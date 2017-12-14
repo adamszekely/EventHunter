@@ -12,35 +12,28 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import com.eventhunters.eventhunter.PriorityQueue.*;
-
+import com.eventhunters.eventhunter.Util.DatesDecorator;
+import com.eventhunters.eventhunter.model.Event;
 import com.eventhunters.eventhunter.model.EventActivity;
-import com.eventhunters.eventhunter.model.EventAdapter;
+import com.eventhunters.eventhunter.Util.EventAdapter;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
-import com.prolificinteractive.materialcalendarview.DayViewDecorator;
-import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.prolificinteractive.materialcalendarview.format.DayFormatter;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -48,9 +41,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 public class CalendarActivity extends AppCompatActivity {
@@ -74,6 +65,7 @@ public class CalendarActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+        //Start of initializations
         listView = (ListView) findViewById(R.id.listView);
         mContext = this.getApplicationContext();
         accessToken = AccessToken.getCurrentAccessToken();
@@ -81,20 +73,24 @@ public class CalendarActivity extends AppCompatActivity {
         priorityQueueEvent = new PriorityQueueEvent();
         eventArrayList = new ArrayList<EventActivity>();
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_calendar);
+        toolbar = (Toolbar) findViewById(R.id.toolBar);
+        eventAdapter = new EventAdapter(CalendarActivity.this, eventArrayList);
+        date = new Date();
+        dates = new ArrayList<CalendarDay>();
+        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
+        calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+        //End of initializations
+
         int colorCodeDark = Color.parseColor("#FF4052B5");
         progressBar.getIndeterminateDrawable().setColorFilter(colorCodeDark, PorterDuff.Mode.SRC_IN);
         progressBar.setVisibility(View.INVISIBLE);
-        setTitle("");
-        toolbar = (Toolbar) findViewById(R.id.toolBar);
-        toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        eventAdapter = new EventAdapter(CalendarActivity.this, eventArrayList);
-        date=new Date();
-        dates = new ArrayList<CalendarDay>();
-
-        calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+        toolbar.setTitle("");
+        setTitle("");
+        //Highlights today
         calendarView.setSelectedDate(date);
-        BottomNavigationView bottomNavigationMenuView = (BottomNavigationView) findViewById(R.id.menu);
+
+        //Listener for bottom navigation bar
         bottomNavigationMenuView.setItemIconTintList(null);
         bottomNavigationMenuView.setSelectedItemId(R.id.nav_calendar);
         bottomNavigationMenuView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -117,42 +113,51 @@ public class CalendarActivity extends AppCompatActivity {
             }
         });
 
-
+        //Adds event dates to a CalendarDay array
         for (int i = 0; i < events.size(); i++) {
             date = events.get(i).getStartDate();
             dates.add(CalendarDay.from(date));
         }
 
+        //Initialize decorator and assign it to the calendar
         mDecorator = new DatesDecorator(dates, mContext);
         calendarView.addDecorator(mDecorator);
 
+        //Shows the today's events
         TodayShow();
 
+        //Listener for the events list under the calendar
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent=new Intent(CalendarActivity.this,DetailedEvent.class);
+                Intent intent=new Intent(CalendarActivity.this,DetailedEventActivity.class);
                 intent.putExtra("pageId",eventArrayList.get(position).getId());
                 startActivity(intent);
             }
         });
 
+        //Listener for clicking on another date
         calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
                 listSize=0;
                 executed=0;
 
+                //Clears the list under the calendar
                 if (eventAdapter.getCount() != 0) {
                     listView.setAdapter(null);
                     eventArrayList.removeAll(eventArrayList);
                 }
+
+                //Adds events to the priorityQueue
                 for (int i = 0; i < events.size(); i++) {
                     if (CalendarDay.from(events.get(i).getStartDate()).equals(date)) {
                         priorityQueueEvent.add(events.get(i));
                         listSize++;
                     }
                 }
+
+                //While the priorityQueue is not empty, retrieve the first event and get event details
                 while (!priorityQueueEvent.isEmpty()) {
                     progressBar.setVisibility(View.VISIBLE);
                     new getEventDetailsAsync().execute(priorityQueueEvent.poll().getId());
@@ -169,6 +174,8 @@ public class CalendarActivity extends AppCompatActivity {
         protected Void doInBackground(final String... strings) {
 
             Bundle params = new Bundle();
+
+            //Request event details from Facebook
             new GraphRequest(
                     accessToken,
                     strings[0] + "?fields=name,place,start_time,picture.type(large),attending_count,maybe_count,id",
@@ -176,9 +183,10 @@ public class CalendarActivity extends AppCompatActivity {
                     HttpMethod.GET,
                     new GraphRequest.Callback() {
                         public void onCompleted(GraphResponse response) {
+                            //Receive response and add to JSON Object
                             JSONObject jsonObject = response.getJSONObject();
                             Log.d("JSONRESPONSE", response.getRawResponse() + "");
-                            //Add all the ids of the pages a user likes into an arraylist
+
                             if (!response.equals("null") && jsonObject!=null) {
                                 try {
                                     drawable = drawableFromUrl(jsonObject.getJSONObject("picture").getJSONObject("data")

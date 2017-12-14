@@ -1,8 +1,11 @@
-package com.eventhunters.eventhunter;
+package com.eventhunters.eventhunter.Util;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.eventhunters.eventhunter.R;
+
+//Used by Facebook login
 public class CustomTabActivity extends AppCompatActivity {
 
     @Override

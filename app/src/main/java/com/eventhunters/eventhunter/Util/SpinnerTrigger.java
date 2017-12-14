@@ -1,4 +1,4 @@
-package com.eventhunters.eventhunter;
+package com.eventhunters.eventhunter.Util;
 import android.content.Context;
 import android.util.AttributeSet;
 

@@ -1,4 +1,4 @@
-package com.eventhunters.eventhunter;
+package com.eventhunters.eventhunter.model;
 
 import java.util.Date;
 
@@ -7,8 +7,10 @@ import java.util.Date;
  */
 
 public class Event {
-    String id, name;
-    Date startDate;
+    public String id, name;
+    public Date startDate;
+    public Date endDate;
+    public double lat, lng;
 
     public Event(String id, String name, Date startDate,Date endDate, double lat, double lng) {
         this.startDate=startDate;
@@ -43,7 +45,6 @@ public class Event {
         return lng;
     }
 
-    Date endDate;
-    double lat, lng;
+
 
 }

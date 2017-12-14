@@ -10,20 +10,16 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -32,7 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class DetailedEvent extends AppCompatActivity {
+public class DetailedEventActivity extends AppCompatActivity {
 
     TextView title, start_date, end_date, location, going, interested, invited, description, host, detail, textInterested, textGoing, textInvited;
     ImageView mainImage, clockStartIcon, clockEndIcon, locationIcon, checkIcon, starIcon, invitedIcon, hostIcon;

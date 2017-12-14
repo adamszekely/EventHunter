@@ -1,4 +1,4 @@
-package com.eventhunters.eventhunter.model;
+package com.eventhunters.eventhunter.Util;
 
 import android.app.Activity;
 import android.support.annotation.Nullable;
@@ -11,14 +11,13 @@ import android.widget.TextView;
 
 
 import com.eventhunters.eventhunter.R;
+import com.eventhunters.eventhunter.model.EventActivity;
 
 import java.util.ArrayList;
 
 /**
  * Created by Tomas on 05/12/2017.
  */
-
-
 
 public class EventAdapter extends ArrayAdapter<EventActivity> {
 

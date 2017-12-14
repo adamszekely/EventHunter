@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.adam.eventhunter.MainActivity">
+    tools:context="com.eventhunters.eventhunter.MainActivity">
 
 
 
@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/linearLayoutTitles">
-        <com.eventhunters.eventhunter.SpinnerTrigger
+        <com.eventhunters.eventhunter.Util.SpinnerTrigger
             android:id="@+id/dynamic_spinner_dates"
             android:layout_weight="1"
             android:layout_width="match_parent"
@@ -80,28 +80,6 @@
             android:scrollbarSize="20dp"
             />
 
-        <!--<Button-->
-            <!--android:id="@+id/normal"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:onClick="click"-->
-            <!--android:text="@string/normal" />-->
-
-        <!--<Button-->
-            <!--android:id="@+id/satellite"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-
-            <!--android:onClick="click"-->
-            <!--android:text="@string/satellite" />-->
-
-        <!--<Button-->
-            <!--android:id="@+id/hybrid"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-
-            <!--android:onClick="click"-->
-            <!--android:text="@string/hybrid" />-->
     </LinearLayout>
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"

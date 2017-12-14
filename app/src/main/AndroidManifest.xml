@@ -39,7 +39,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CustomTabActivity"
+            android:name=".Util.CustomTabActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -54,7 +54,7 @@
             android:name=".CalendarActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".DetailedEvent"
+            android:name=".DetailedEventActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ListActivity"

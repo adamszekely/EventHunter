@@ -1,7 +1,6 @@
 package com.eventhunters.eventhunter.model;
 
 import android.graphics.drawable.Drawable;
-import android.widget.Button;
 
 /**
  * Created by Tomas on 05/12/2017.

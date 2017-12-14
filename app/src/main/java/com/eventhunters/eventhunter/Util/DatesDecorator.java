@@ -1,14 +1,14 @@
-package com.eventhunters.eventhunter;
+package com.eventhunters.eventhunter.Util;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 
+import com.eventhunters.eventhunter.R;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
-
 import java.util.List;
 
 /**
