@@ -996,6 +996,7 @@ public class MainActivity extends AppCompatActivity implements android.location.
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progressBar.setVisibility(View.VISIBLE);
+            Toast.makeText(MainActivity.this,"You have "+pagesList.size()+" liked pages",Toast.LENGTH_LONG).show();
         }
     }
 
